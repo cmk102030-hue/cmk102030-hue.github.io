@@ -568,7 +568,8 @@ const UA_DEFAULTS=[0,300000,600000,100000];
 // 상태
 // ============================================================
 let PERIOD = {
-  startMonth:3, totalMonths:9, numPhases:3, phaseLens:[1,2,6]
+  startMonth:3, totalMonths:9, numPhases:3, phaseLens:[1,2,6],
+  phaseMultipliers:[{iaa:50,iap:35},{iaa:75,iap:65},{iaa:100,iap:100},{iaa:100,iap:100}]
 };
 let SC = {
   bull:{
@@ -639,6 +640,10 @@ function getMonthlyUA(phIdx){
 function getUA(moIdx){
   return getMonthlyUA(getPH()[moIdx]);
 }
+function getPhMult(phIdx){
+  const m=PERIOD.phaseMultipliers[phIdx]||{iaa:100,iap:100};
+  return {iaa:m.iaa/100, iap:m.iap/100};
+}
 
 // ============================================================
 // LTV / 보정 계수
@@ -678,15 +683,17 @@ function simSc(p){
     const paid=cpi>0?ua/cpi:0;
     const newU=paid*(1+p.organic/100);
     dau=Math.max(dau*(p.mat/100)+newU*(p.d1ret/100)*0.40, START_DAU*0.15);
-    // IAA: 타입별 합산
+    // IAA: 타입별 합산 + Phase 성숙도 배율 적용
     const iaaSum=calcIaaSummary(p);
-    const iaaArpdau=iaaSum.arpdau;
+    const mult=getPhMult(PH[i]);
+    const iaaArpdau=iaaSum.arpdau*mult.iaa;
     // IAP
     const d7arppu=p.d0arppu*(1+p.arppu07/100);
     const d30arppu=d7arppu*(1+p.arppu730/100);
     const calib=(retIntegral(p.d1ret,p.d7ret,p.d30ret)/BASE_CALIB)*(BASE_LTV/BASE_ARPDAU_IAA);
     const d30iap=(p.pur/100)*d30arppu;
-    const iapArpdau=d30iap/calib;
+    const iapArpdauBase=d30iap/calib;
+    const iapArpdau=iapArpdauBase*mult.iap;
     const iaa=Math.round(dau*iaaArpdau*DAYS[i]);
     const iap=Math.round(dau*iapArpdau*DAYS[i]);
     const rev=iaa+iap;
@@ -1034,6 +1041,11 @@ function updPhBtns(){
 // ============================================================
 // UA 섹션 동적 렌더링
 // ============================================================
+function multColor(v){
+  if(v>=100) return {bg:'var(--green-bg)',color:'var(--green)'};
+  if(v>=70)  return {bg:'var(--blue-bg)', color:'var(--blue)'};
+  return {bg:'var(--amber-bg)',color:'var(--amber)'};
+}
 function renderUASection(){
   const lens=getPhaseLens();
   const mos=getMOS();
@@ -1046,6 +1058,9 @@ function renderUASection(){
     const curEl=document.getElementById('p'+(i+1)+'ua');
     const curVal=curEl?curEl.value:(UA_DEFAULTS[i]||50000);
     const monthly=Math.round((parseFloat(curVal)||0)/len);
+    const iaaM=(PERIOD.phaseMultipliers[i]||{iaa:100}).iaa;
+    const iapM=(PERIOD.phaseMultipliers[i]||{iap:100}).iap;
+    const iaaC=multColor(iaaM), iapC=multColor(iapM);
     h+=`<div class="ua-phase" style="border-top:2px solid ${PH_COLORS[i]}">
       <div class="ua-phase-label" style="color:${PH_COLORS[i]}">PHASE ${i+1} · ${moLabel} (${PH_NAMES[i]||'Phase'+(i+1)} · ${len}개월)</div>
       <div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">
@@ -1053,9 +1068,32 @@ function renderUASection(){
         <span style="font-weight:600;color:var(--text2)">$</span>
         <input type="number" id="p${i+1}ua" value="${curVal}" step="5000" onchange="updUALabel()" onblur="updUALabel()" style="flex:1" placeholder="${UA_DEFAULTS[i]||50000}">
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:${PH_BG[i]};border-radius:6px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:${PH_BG[i]};border-radius:6px;margin-bottom:10px">
         <span style="font-size:11px;color:${PH_COLORS[i]}">월 예산</span>
         <span style="font-size:13px;font-weight:700;color:${PH_COLORS[i]}" id="p${i+1}ua-monthly">$${monthly.toLocaleString()}/월</span>
+      </div>
+      <div style="border-top:0.5px solid var(--border);padding-top:8px">
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:7px">
+          <span style="font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)">LTV 성숙도 배율</span>
+          <span class="info-btn" onclick="toggleInfo('ph-mult-info-${i}')">i</span>
+        </div>
+        <div class="info-box" id="ph-mult-info-${i}">
+          해당 Phase 신규 유저의 LTV 실현율. 초기 유저는 게임에 덜 익숙해 광고 노출·결제 빈도가 낮음.<br>
+          <b>100% = 파라미터 설정값 그대로</b> / 50% = 절반만 실현<br>
+          IAA·IAP 각각 독립 설정 가능.
+        </div>
+        <div class="ctrl" style="margin-bottom:5px">
+          <div class="ctrl-lbl">IAA 배율 <b id="ph${i}-iaa-lbl">${iaaM}%</b></div>
+          <input type="range" min="10" max="120" step="5" value="${iaaM}" oninput="setPhMult(${i},'iaa',+this.value)">
+        </div>
+        <div class="ctrl" style="margin-bottom:7px">
+          <div class="ctrl-lbl">IAP 배율 <b id="ph${i}-iap-lbl">${iapM}%</b></div>
+          <input type="range" min="10" max="120" step="5" value="${iapM}" oninput="setPhMult(${i},'iap',+this.value)">
+        </div>
+        <div style="display:flex;gap:5px">
+          <div id="ph${i}-iaa-badge" style="flex:1;text-align:center;padding:3px 0;background:${iaaC.bg};border-radius:4px;font-size:10px;font-weight:600;color:${iaaC.color}">IAA ${iaaM}%</div>
+          <div id="ph${i}-iap-badge" style="flex:1;text-align:center;padding:3px 0;background:${iapC.bg};border-radius:4px;font-size:10px;font-weight:600;color:${iapC.color}">IAP ${iapM}%</div>
+        </div>
       </div>
     </div>`;
     moStart+=len;
@@ -1135,6 +1173,21 @@ function updArppu(sc){
 function toggleInfo(id){
   const el=document.getElementById(id);
   if(el) el.classList.toggle('open');
+}
+function setPhMult(phIdx,type,val){
+  if(!PERIOD.phaseMultipliers[phIdx]) PERIOD.phaseMultipliers[phIdx]={iaa:100,iap:100};
+  PERIOD.phaseMultipliers[phIdx][type]=val;
+  // 라벨 업데이트
+  const lbl=document.getElementById('ph'+phIdx+'-'+type+'-lbl');
+  if(lbl) lbl.textContent=val+'%';
+  // 배지 색상 업데이트
+  const badge=document.getElementById('ph'+phIdx+'-'+type+'-badge');
+  if(badge){
+    const c=multColor(val);
+    badge.style.background=c.bg; badge.style.color=c.color;
+    badge.textContent=(type==='iaa'?'IAA ':'IAP ')+val+'%';
+  }
+  render();
 }
 function toggleParams(){
   const body=document.getElementById('params-body');
