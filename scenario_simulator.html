@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>연간 매출 시나리오 시뮬레이터</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f9f9f7;--card:#fff;--border:#e5e4df;--border2:#d0cfc9;
+  --text:#1a1a18;--text2:#6b6b67;--text3:#999;
+  --blue:#185FA5;--blue-bg:#E6F1FB;--blue-border:#B5D4F4;
+  --green:#0F6E56;--green-bg:#EAF3DE;--green-border:#C0DD97;
+  --amber:#854F0B;--amber-bg:#FAEEDA;--amber-border:#FAC775;
+  --red:#A32D2D;--red-bg:#FCEBEB;--red-border:#F7C1C1;
+  --teal:#1D9E75;--purple:#534AB7;
+  --radius:8px;--radius-lg:12px;
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;line-height:1.6}
+
+/* LAYOUT */
+.page{max-width:1200px;margin:0 auto;padding:24px 20px}
+.page-title{font-size:20px;font-weight:600;margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--text2);margin-bottom:24px}
+
+/* PARAMS PANEL */
+.params-panel{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:20px}
+.params-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;cursor:pointer;user-select:none}
+.params-header h2{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.params-header .toggle-icon{font-size:12px;color:var(--text2);transition:transform .2s}
+.params-header .toggle-icon.open{transform:rotate(180deg)}
+.params-body{display:none}
+.params-body.open{display:block}
+
+.sc-params-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.sc-col{border:0.5px solid var(--border);border-radius:var(--radius);padding:14px}
+.sc-col.bull{border-top:3px solid var(--green)}
+.sc-col.base{border-top:3px solid var(--blue)}
+.sc-col.bear{border-top:3px solid var(--red)}
+.sc-col-title{font-size:12px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.sc-col.bull .sc-col-title{color:var(--green)}
+.sc-col.base .sc-col-title{color:var(--blue)}
+.sc-col.bear .sc-col-title{color:var(--red)}
+
+.param-group{margin-bottom:12px}
+.param-group-title{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;padding-bottom:4px;border-bottom:0.5px solid var(--border)}
+.ctrl{display:flex;flex-direction:column;gap:2px;margin-bottom:6px}
+.ctrl-lbl{font-size:11px;color:var(--text2);display:flex;justify-content:space-between;align-items:center}
+.ctrl-lbl b{font-weight:600;color:var(--text);font-size:12px}
+.ctrl-lbl .linked{font-size:10px;color:var(--teal);cursor:pointer;padding:1px 5px;border:0.5px solid var(--teal);border-radius:10px}
+input[type=range]{width:100%;height:4px;-webkit-appearance:none;background:var(--border2);border-radius:2px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--text);cursor:pointer}
+
+/* UA PHASE */
+.ua-phase-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.ua-phase{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:10px}
+.ua-phase-label{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.ua-phase input[type=number]{width:100%;border:0.5px solid var(--border2);border-radius:6px;padding:5px 8px;font-size:13px;font-weight:600;background:var(--card);color:var(--text);outline:none} .ua-phase input[type=number]:focus{border-color:var(--blue)}
+.ua-phase input[type=number]:focus{border-color:var(--blue)}
+
+/* TARGET */
+.target-row{display:flex;align-items:center;gap:12px;margin-top:12px;padding:10px 12px;background:var(--bg);border-radius:var(--radius)}
+.target-row label{font-size:12px;color:var(--text2);white-space:nowrap}
+.target-row input[type=number]{border:0.5px solid var(--border2);border-radius:6px;padding:5px 8px;font-size:13px;font-weight:600;width:130px;background:var(--card);color:var(--text);outline:none} .target-row input[type=number]:focus{border-color:var(--blue)}
+
+/* SECTION */
+.section{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px}
+.section-title{font-size:13px;font-weight:600;margin-bottom:14px;color:var(--text)}
+
+/* KPI CARDS */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px}
+.kpi-card{background:var(--bg);border-radius:var(--radius);padding:10px 12px}
+.kpi-label{font-size:11px;color:var(--text2);margin-bottom:2px}
+.kpi-value{font-size:18px;font-weight:600}
+.kpi-sub{font-size:11px;color:var(--text2);margin-top:2px}
+
+/* SC SUMMARY */
+.sc-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.sc-card{border-radius:var(--radius);padding:14px;border:0.5px solid var(--border)}
+.sc-card.bull{border-top:3px solid var(--green)}
+.sc-card.base{border-top:3px solid var(--blue)}
+.sc-card.bear{border-top:3px solid var(--red)}
+.sc-card-tag{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+.sc-card.bull .sc-card-tag{color:var(--green)}
+.sc-card.base .sc-card-tag{color:var(--blue)}
+.sc-card.bear .sc-card-tag{color:var(--red)}
+.sc-card-name{font-size:13px;font-weight:500;margin-bottom:8px;color:var(--text)}
+.sc-card-rev{font-size:24px;font-weight:700;margin-bottom:4px}
+.sc-card.bull .sc-card-rev{color:var(--green)}
+.sc-card.base .sc-card-rev{color:var(--blue)}
+.sc-card.bear .sc-card-rev{color:var(--red)}
+.sc-card-meta{font-size:11px;color:var(--text2);line-height:1.6}
+.gauge-track{height:5px;background:var(--border);border-radius:3px;margin:6px 0 2px}
+.gauge-fill{height:100%;border-radius:3px;transition:width .4s}
+.gauge-label{font-size:10px;color:var(--text2);display:flex;justify-content:space-between}
+
+/* CHART */
+.chart-wrap{position:relative;width:100%;height:240px;margin-bottom:16px}
+.chart-sm{position:relative;width:100%;height:180px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.sub-section-title{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--text2);margin-bottom:8px}
+.legend span{display:flex;align-items:center;gap:4px}
+.legend i{width:9px;height:9px;border-radius:2px;display:inline-block;flex-shrink:0}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{padding:6px 8px;border-bottom:0.5px solid var(--border2);color:var(--text2);font-weight:500;text-align:right;white-space:nowrap;font-size:11px}
+th:first-child{text-align:left}
+td{padding:5px 8px;border-bottom:0.5px solid var(--border);text-align:right;font-variant-numeric:tabular-nums}
+td:first-child{text-align:left}
+tr.phase-sep td{border-top:1.5px solid var(--border2)}
+tr.total-row td{background:#f5f4f0;font-weight:600}
+.badge{font-size:10px;padding:1px 6px;border-radius:4px;font-weight:500}
+.bg{background:var(--green-bg);color:var(--green)}
+.bb{background:var(--amber-bg);color:var(--amber)}
+.br{background:var(--red-bg);color:var(--red)}
+
+/* LTV CARDS */
+.ltv-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px}
+.ltv-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:12px}
+.ltv-row .ltv-key{color:var(--text2)}
+.ltv-row .ltv-val{font-weight:600;color:var(--text)}
+.ltv-total{border-top:0.5px solid var(--border2);margin-top:6px;padding-top:6px;font-size:14px;font-weight:700}
+.ltv-incr{font-size:11px;margin-top:4px}
+
+/* DIVIDER */
+hr{border:none;border-top:0.5px solid var(--border);margin:14px 0}
+
+/* TABS */
+.detail-tabs{display:flex;gap:4px;margin-bottom:12px}
+.detail-tab{padding:5px 12px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--text2);border:0.5px solid transparent}
+.detail-tab.on{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-border);font-weight:500}
+
+/* PHASE BADGE */
+.ph-badge{font-size:9px;padding:1px 5px;border-radius:3px;margin-right:4px;font-weight:500}
+.ph1{background:var(--green-bg);color:var(--green)}
+.ph2{background:var(--amber-bg);color:var(--amber)}
+.ph3{background:var(--blue-bg);color:var(--blue)}
+
+@media(max-width:768px){
+  .sc-params-grid,.sc-summary,.kpi-grid,.two-col,.three-col{grid-template-columns:1fr}
+  .ua-phase-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="page-title">연간 매출 시나리오 시뮬레이터</div>
+  <div class="page-sub">계획서 기반 · 3개 시나리오 비교 · Apr~Dec 2026</div>
+
+  <!-- ===== PARAMS PANEL ===== -->
+  <div class="params-panel">
+    <div class="params-header" onclick="toggleParams()">
+      <h2>⚙ 파라미터 설정 <span style="font-size:12px;font-weight:400;color:var(--text2)">(클릭하여 펼치기/접기)</span></h2>
+      <span class="toggle-icon open" id="toggle-icon">▼</span>
+    </div>
+    <div class="params-body open" id="params-body">
+
+      <!-- UA Phase -->
+      <div style="margin-bottom:16px">
+        <div class="sub-section-title">UA 예산 (Phase별 · 공통)</div>
+        <div class="ua-phase-grid">
+          <div class="ua-phase">
+            <div class="ua-phase-label" style="color:var(--green)">Phase 1 · Apr (소프트런치 · 1개월)</div>
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">
+              <span style="font-size:11px;color:var(--text2);min-width:44px">총예산</span>
+              <span style="font-weight:600;color:var(--text2)">$</span>
+              <input type="number" id="p1ua" value="0" step="5000" onchange="updUALabel()" onblur="updUALabel()" style="flex:1" placeholder="30000">
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:var(--green-bg);border-radius:6px">
+              <span style="font-size:11px;color:var(--green)">월 예산</span>
+              <span style="font-size:13px;font-weight:700;color:var(--green)" id="p1ua-monthly">$0/월</span>
+            </div>
+          </div>
+          <div class="ua-phase">
+            <div class="ua-phase-label" style="color:var(--amber)">Phase 2 · May~Jun (스케일업 · 2개월)</div>
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">
+              <span style="font-size:11px;color:var(--text2);min-width:44px">총예산</span>
+              <span style="font-weight:600;color:var(--text2)">$</span>
+              <input type="number" id="p2ua" value="300000" step="5000" onchange="updUALabel()" onblur="updUALabel()" style="flex:1" placeholder="90000">
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:var(--amber-bg);border-radius:6px">
+              <span style="font-size:11px;color:var(--amber)">월 예산</span>
+              <span style="font-size:13px;font-weight:700;color:var(--amber)" id="p2ua-monthly">$150,000/월</span>
+            </div>
+          </div>
+          <div class="ua-phase">
+            <div class="ua-phase-label" style="color:var(--blue)">Phase 3 · Jul~Dec (안정 운영 · 6개월)</div>
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">
+              <span style="font-size:11px;color:var(--text2);min-width:44px">총예산</span>
+              <span style="font-weight:600;color:var(--text2)">$</span>
+              <input type="number" id="p3ua" value="600000" step="10000" onchange="updUALabel()" onblur="updUALabel()" style="flex:1" placeholder="240000">
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:var(--blue-bg);border-radius:6px">
+              <span style="font-size:11px;color:var(--blue)">월 예산</span>
+              <span style="font-size:13px;font-weight:700;color:var(--blue)" id="p3ua-monthly">$100,000/월</span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:10px;padding:8px 14px;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <span style="font-size:12px;color:var(--text2)">연간 UA 총합</span>
+          <span style="font-size:15px;font-weight:700;color:var(--text)" id="ua-total-label">$900,000</span>
+          <span style="font-size:12px;color:var(--text2);margin-left:16px">마진율</span>
+          <span style="font-size:15px;font-weight:700" id="ua-margin-bull" style="color:var(--green)">-</span>
+          <span style="font-size:12px;color:var(--text2)">/</span>
+          <span style="font-size:15px;font-weight:700" id="ua-margin-base">-</span>
+          <span style="font-size:12px;color:var(--text2)">/</span>
+          <span style="font-size:15px;font-weight:700" id="ua-margin-bear" style="color:var(--red)">-</span>
+          <span style="font-size:11px;color:var(--text2)">(공격/현실/보수)</span>
+          <span style="font-size:12px;color:var(--text2);margin-left:8px">연간 목표 매출</span>
+          <span style="font-weight:600;color:var(--text2)">$</span>
+          <input type="number" id="targetRev" value="10375000" step="100000" onchange="render()" onblur="render()" style="width:130px;border:0.5px solid var(--border2);border-radius:6px;padding:5px 8px;font-size:13px;font-weight:600;background:var(--card);color:var(--text);outline:none">
+        </div>
+      </div>
+
+      <div class="sc-params-grid">
+        <!-- BULL -->
+        <div class="sc-col bull">
+          <div class="sc-col-title">▲ 공격안</div>
+          <div class="param-group">
+            <div class="param-group-title">리텐션</div>
+            <div class="ctrl"><div class="ctrl-lbl">D1 리텐션 <b id="bl-d1">55%</b></div><input type="range" min="20" max="80" step="1" value="55" oninput="sp('bull','d1ret',+this.value,'bl-d1','',0,'%');syncD7('bull')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D7 리텐션 <span class="linked" id="bull-d7-link" onclick="toggleLink('bull')">D1 연동</span><b id="bl-d7">27.5%</b></div><input type="range" min="5" max="50" step="0.5" value="27.5" id="bull-d7-slider" oninput="sp('bull','d7ret',+this.value,'bl-d7','',1,'%')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D30 리텐션 <span class="linked" id="bull-d30-link" onclick="toggleD30Link('bull')">D1 연동</span><b id="bl-d30">11%</b></div><input type="range" min="2" max="25" step="0.5" value="11" id="bull-d30-slider" oninput="SC.bull.d30linked=false;document.getElementById('bull-d30-link').textContent='수동';document.getElementById('bull-d30-link').style.color='var(--text2)';sp('bull','d30ret',+this.value,'bl-d30','',1,'%')"></div>
+          </div>
+          <div class="param-group">
+            <div class="param-group-title">LTV — IAA</div>
+            <div class="ctrl"><div class="ctrl-lbl">D0 IAA LTV <b id="bl-d0iaa">$0.257</b></div><input type="range" min="0.05" max="1.5" step="0.01" value="0.257" oninput="sp('bull','d0iaa',+this.value,'bl-d0iaa','$',2)"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="bl-07">88%</b></div><input type="range" min="20" max="500" step="10" value="88" oninput="sp('bull','d07',+this.value,'bl-07','',0,'%')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="bl-730">275%</b></div><input type="range" min="0" max="500" step="5" value="275" oninput="sp('bull','d730',+this.value,'bl-730','',0,'%')"></div>
+          </div>
+          <div class="param-group">
+            <div class="param-group-title">LTV — IAP</div>
+            <div class="ctrl"><div class="ctrl-lbl">PUR <b id="bl-pur">5.5%</b></div><input type="range" min="0" max="15" step="0.5" value="5.5" oninput="sp('bull','pur',+this.value,'bl-pur','',1,'%')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">ARPPU <b id="bl-ap">$11.00</b></div><input type="range" min="0.5" max="20" step="0.5" value="11" oninput="sp('bull','arppu',+this.value,'bl-ap','$',2)"></div>
+          </div>
+          <div class="param-group">
+            <div class="param-group-title">UA / 광고</div>
+            <div class="ctrl"><div class="ctrl-lbl">초기 CPI <b id="bl-cpi">$0.63</b></div><input type="range" min="0.2" max="3.0" step="0.05" value="0.63" oninput="sp('bull','cpi',+this.value,'bl-cpi','$',2)"></div>
+            <div class="ctrl"><div class="ctrl-lbl">eCPM 희석 <b id="bl-dil">완만</b></div><input type="range" min="0" max="2" step="1" value="0" oninput="spDil('bull',+this.value,'bl-dil')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">오가닉 비율 <b id="bl-org">25%</b></div><input type="range" min="0" max="60" step="5" value="25" oninput="sp('bull','organic',+this.value,'bl-org','',0,'%')"></div>
+          </div>
+        </div>
+
+        <!-- BASE -->
+        <div class="sc-col base">
+          <div class="sc-col-title">— 현실안</div>
+          <div class="param-group">
+            <div class="param-group-title">리텐션</div>
+            <div class="ctrl"><div class="ctrl-lbl">D1 리텐션 <b id="bm-d1">50%</b></div><input type="range" min="20" max="80" step="1" value="50" oninput="sp('base','d1ret',+this.value,'bm-d1','',0,'%');syncD7('base')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D7 리텐션 <span class="linked" id="base-d7-link" onclick="toggleLink('base')">D1 연동</span><b id="bm-d7">25%</b></div><input type="range" min="5" max="50" step="0.5" value="25" id="base-d7-slider" oninput="sp('base','d7ret',+this.value,'bm-d7','',1,'%')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D30 리텐션 <span class="linked" id="base-d30-link" onclick="toggleD30Link('base')">D1 연동</span><b id="bm-d30">10%</b></div><input type="range" min="2" max="25" step="0.5" value="10" id="base-d30-slider" oninput="SC.base.d30linked=false;document.getElementById('base-d30-link').textContent='수동';document.getElementById('base-d30-link').style.color='var(--text2)';sp('base','d30ret',+this.value,'bm-d30','',1,'%')"></div>
+          </div>
+          <div class="param-group">
+            <div class="param-group-title">LTV — IAA</div>
+            <div class="ctrl"><div class="ctrl-lbl">D0 IAA LTV <b id="bm-d0iaa">$0.234</b></div><input type="range" min="0.05" max="1.5" step="0.01" value="0.234" oninput="sp('base','d0iaa',+this.value,'bm-d0iaa','$',2)"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="bm-07">80%</b></div><input type="range" min="20" max="500" step="10" value="80" oninput="sp('base','d07',+this.value,'bm-07','',0,'%')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="bm-730">250%</b></div><input type="range" min="0" max="500" step="5" value="250" oninput="sp('base','d730',+this.value,'bm-730','',0,'%')"></div>
+          </div>
+          <div class="param-group">
+            <div class="param-group-title">LTV — IAP</div>
+            <div class="ctrl"><div class="ctrl-lbl">PUR <b id="bm-pur">5%</b></div><input type="range" min="0" max="15" step="0.5" value="5" oninput="sp('base','pur',+this.value,'bm-pur','',1,'%')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">ARPPU <b id="bm-ap">$10.00</b></div><input type="range" min="0.5" max="20" step="0.5" value="10" oninput="sp('base','arppu',+this.value,'bm-ap','$',2)"></div>
+          </div>
+          <div class="param-group">
+            <div class="param-group-title">UA / 광고</div>
+            <div class="ctrl"><div class="ctrl-lbl">초기 CPI <b id="bm-cpi">$0.70</b></div><input type="range" min="0.2" max="3.0" step="0.05" value="0.70" oninput="sp('base','cpi',+this.value,'bm-cpi','$',2)"></div>
+            <div class="ctrl"><div class="ctrl-lbl">eCPM 희석 <b id="bm-dil">보통</b></div><input type="range" min="0" max="2" step="1" value="1" oninput="spDil('base',+this.value,'bm-dil')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">오가닉 비율 <b id="bm-org">20%</b></div><input type="range" min="0" max="60" step="5" value="20" oninput="sp('base','organic',+this.value,'bm-org','',0,'%')"></div>
+          </div>
+        </div>
+
+        <!-- BEAR -->
+        <div class="sc-col bear">
+          <div class="sc-col-title">▼ 보수안</div>
+          <div class="param-group">
+            <div class="param-group-title">리텐션</div>
+            <div class="ctrl"><div class="ctrl-lbl">D1 리텐션 <b id="bw-d1">45%</b></div><input type="range" min="20" max="80" step="1" value="45" oninput="sp('bear','d1ret',+this.value,'bw-d1','',0,'%');syncD7('bear')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D7 리텐션 <span class="linked" id="bear-d7-link" onclick="toggleLink('bear')">D1 연동</span><b id="bw-d7">22.5%</b></div><input type="range" min="5" max="50" step="0.5" value="22.5" id="bear-d7-slider" oninput="sp('bear','d7ret',+this.value,'bw-d7','',1,'%')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D30 리텐션 <span class="linked" id="bear-d30-link" onclick="toggleD30Link('bear')">D1 연동</span><b id="bw-d30">9%</b></div><input type="range" min="2" max="25" step="0.5" value="9" id="bear-d30-slider" oninput="SC.bear.d30linked=false;document.getElementById('bear-d30-link').textContent='수동';document.getElementById('bear-d30-link').style.color='var(--text2)';sp('bear','d30ret',+this.value,'bw-d30','',1,'%')"></div>
+          </div>
+          <div class="param-group">
+            <div class="param-group-title">LTV — IAA</div>
+            <div class="ctrl"><div class="ctrl-lbl">D0 IAA LTV <b id="bw-d0iaa">$0.211</b></div><input type="range" min="0.05" max="1.5" step="0.01" value="0.211" oninput="sp('bear','d0iaa',+this.value,'bw-d0iaa','$',2)"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="bw-07">72%</b></div><input type="range" min="20" max="500" step="10" value="72" oninput="sp('bear','d07',+this.value,'bw-07','',0,'%')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="bw-730">225%</b></div><input type="range" min="0" max="500" step="5" value="225" oninput="sp('bear','d730',+this.value,'bw-730','',0,'%')"></div>
+          </div>
+          <div class="param-group">
+            <div class="param-group-title">LTV — IAP</div>
+            <div class="ctrl"><div class="ctrl-lbl">PUR <b id="bw-pur">4.5%</b></div><input type="range" min="0" max="15" step="0.5" value="4.5" oninput="sp('bear','pur',+this.value,'bw-pur','',1,'%')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">ARPPU <b id="bw-ap">$9.00</b></div><input type="range" min="0.5" max="20" step="0.5" value="9" oninput="sp('bear','arppu',+this.value,'bw-ap','$',2)"></div>
+          </div>
+          <div class="param-group">
+            <div class="param-group-title">UA / 광고</div>
+            <div class="ctrl"><div class="ctrl-lbl">초기 CPI <b id="bw-cpi">$0.77</b></div><input type="range" min="0.2" max="3.0" step="0.05" value="0.77" oninput="sp('bear','cpi',+this.value,'bw-cpi','$',2)"></div>
+            <div class="ctrl"><div class="ctrl-lbl">eCPM 희석 <b id="bw-dil">급격</b></div><input type="range" min="0" max="2" step="1" value="2" oninput="spDil('bear',+this.value,'bw-dil')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">오가닉 비율 <b id="bw-org">15%</b></div><input type="range" min="0" max="60" step="5" value="15" oninput="sp('bear','organic',+this.value,'bw-org','',0,'%')"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== RESULT COMPARE ===== -->
+  <div class="section">
+    <div class="section-title">결과 비교</div>
+
+    <div class="sc-summary">
+      <div class="sc-card bull">
+        <div class="sc-card-tag">공격안</div>
+        <div class="sc-card-name">적극 성장</div>
+        <div class="sc-card-rev" id="bull-rev">-</div>
+        <div class="gauge-track"><div class="gauge-fill" id="bull-gauge" style="background:var(--green)"></div></div>
+        <div class="gauge-label"><span id="bull-pct">-</span><span>목표 대비</span></div>
+        <div class="sc-card-meta" id="bull-meta"></div>
+      </div>
+      <div class="sc-card base">
+        <div class="sc-card-tag">현실안</div>
+        <div class="sc-card-name">안정 성장</div>
+        <div class="sc-card-rev" id="base-rev">-</div>
+        <div class="gauge-track"><div class="gauge-fill" id="base-gauge" style="background:var(--blue)"></div></div>
+        <div class="gauge-label"><span id="base-pct">-</span><span>목표 대비</span></div>
+        <div class="sc-card-meta" id="base-meta"></div>
+      </div>
+      <div class="sc-card bear">
+        <div class="sc-card-tag">보수안</div>
+        <div class="sc-card-name">리스크 대비</div>
+        <div class="sc-card-rev" id="bear-rev">-</div>
+        <div class="gauge-track"><div class="gauge-fill" id="bear-gauge" style="background:var(--red)"></div></div>
+        <div class="gauge-label"><span id="bear-pct">-</span><span>목표 대비</span></div>
+        <div class="sc-card-meta" id="bear-meta"></div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span><i style="background:#0F6E56"></i>공격안</span>
+      <span><i style="background:#185FA5"></i>현실안</span>
+      <span><i style="background:#A32D2D"></i>보수안</span>
+      <span><i style="background:#888;opacity:.5"></i>계획서 목표</span>
+    </div>
+    <div class="sub-section-title">월별 매출</div>
+    <div class="chart-wrap"><canvas id="compareChart"></canvas></div>
+
+    <div class="two-col">
+      <div>
+        <div class="sub-section-title">누적 매출 곡선</div>
+        <div class="chart-sm"><canvas id="cumChart"></canvas></div>
+      </div>
+      <div>
+        <div class="sub-section-title">ARPDAU 추이</div>
+        <div class="legend">
+          <span><i style="background:#0F6E56"></i>공격</span>
+          <span><i style="background:#185FA5"></i>현실</span>
+          <span><i style="background:#A32D2D"></i>보수</span>
+          <span><i style="background:#999;opacity:.5"></i>현재 $0.357</span>
+        </div>
+        <div class="chart-sm"><canvas id="arpdauChart"></canvas></div>
+      </div>
+    </div>
+
+    <hr>
+    <div>
+      <div>
+        <div class="sub-section-title">DAU 성장 추이</div>
+        <div class="chart-sm"><canvas id="dauChart"></canvas></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== LTV ===== -->
+  <div class="section">
+    <div class="section-title">LTV 구조</div>
+    <div class="three-col" id="ltv-cards"></div>
+    <div class="sub-section-title">D0 → D7 → D30 LTV 증분 비교</div>
+    <div class="legend">
+      <span><i style="background:#0F6E56"></i>공격안</span>
+      <span><i style="background:#185FA5"></i>현실안</span>
+      <span><i style="background:#A32D2D"></i>보수안</span>
+      <span><i style="background:#999;opacity:.5"></i>현재 실측</span>
+    </div>
+    <div class="chart-wrap"><canvas id="ltvChart"></canvas></div>
+
+    <hr>
+    <div class="sub-section-title">eCPM 희석 추이 (시나리오별)</div>
+    <div class="legend">
+      <span><i style="background:#0F6E56"></i>공격(완만)</span>
+      <span><i style="background:#185FA5"></i>현실(보통)</span>
+      <span><i style="background:#A32D2D"></i>보수(급격)</span>
+    </div>
+    <div class="chart-sm" style="max-width:600px"><canvas id="ecpmChart"></canvas></div>
+  </div>
+
+  <!-- ===== MONTHLY DETAIL ===== -->
+  <div class="section">
+    <div class="section-title">월별 상세</div>
+    <div class="detail-tabs">
+      <div class="detail-tab on" onclick="showDetailTab('all')">3개 시나리오 비교</div>
+      <div class="detail-tab" onclick="showDetailTab('bull')">공격안</div>
+      <div class="detail-tab" onclick="showDetailTab('base')">현실안</div>
+      <div class="detail-tab" onclick="showDetailTab('bear')">보수안</div>
+    </div>
+    <div style="overflow-x:auto"><table id="detailTbl"></table></div>
+  </div>
+
+</div>
+
+<script>
+const MOS=['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAYS=[30,31,30,31,31,30,31,30,31];
+const PH=[0,1,1,2,2,2,2,2,2];
+const BASE_ECPM=34.1, BASE_IMPS=10.0, START_DAU=308;
+const DIL_LABELS=['완만','보통','급격'];
+const PLAN_MONTHLY=[45000,135000,252000,660000,1120000,1680000,1950000,2050000,2480000];
+
+let SC={
+  bull:{d1ret:55,d7ret:27.5,d30ret:11,d0iaa:0.257,d07:88,d730:275,pur:5.5,arppu:11,cpi:0.63,dil:0,organic:25,mat:82,d7linked:true,d30linked:true},
+  base:{d1ret:50,d7ret:25,d30ret:10,d0iaa:0.234,d07:80,d730:250,pur:5,arppu:10,cpi:0.70,dil:1,organic:20,mat:80,d7linked:true,d30linked:true},
+  bear:{d1ret:45,d7ret:22.5,d30ret:9,d0iaa:0.211,d07:72,d730:225,pur:4.5,arppu:9,cpi:0.77,dil:2,organic:15,mat:78,d7linked:true,d30linked:true},
+};
+let detailTab='all';
+let charts={};
+
+function toggleParams(){
+  const body=document.getElementById('params-body');
+  const icon=document.getElementById('toggle-icon');
+  body.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+
+function toggleLink(sc){
+  SC[sc].d7linked=!SC[sc].d7linked;
+  const el=document.getElementById(sc+'-d7-link');
+  el.textContent=SC[sc].d7linked?'D1 연동':'수동';
+  el.style.color=SC[sc].d7linked?'var(--teal)':'var(--text2)';
+  if(SC[sc].d7linked) syncD7(sc);
+}
+function toggleD30Link(sc){
+  SC[sc].d30linked=!SC[sc].d30linked;
+  const el=document.getElementById(sc+'-d30-link');
+  el.textContent=SC[sc].d30linked?'D1 연동':'수동';
+  el.style.color=SC[sc].d30linked?'var(--teal)':'var(--text2)';
+  if(SC[sc].d30linked) syncD30(sc);
+}
+
+function syncD7(sc){
+  if(!SC[sc].d7linked) return;
+  const d7=SC[sc].d1ret*0.5;
+  SC[sc].d7ret=d7;
+  const slMap={bull:'bull-d7-slider',base:'base-d7-slider',bear:'bear-d7-slider'};
+  const lblMap={bull:'bl-d7',base:'bm-d7',bear:'bw-d7'};
+  document.getElementById(slMap[sc]).value=d7;
+  document.getElementById(lblMap[sc]).textContent=d7.toFixed(1)+'%';
+  syncD30(sc);
+}
+function syncD30(sc){
+  if(!SC[sc].d30linked) return;
+  const d30=SC[sc].d1ret*0.2;
+  SC[sc].d30ret=d30;
+  const slMap={bull:'bull-d30-slider',base:'base-d30-slider',bear:'bear-d30-slider'};
+  const lblMap={bull:'bl-d30',base:'bm-d30',bear:'bw-d30'};
+  document.getElementById(slMap[sc]).value=d30;
+  document.getElementById(lblMap[sc]).textContent=d30.toFixed(1)+'%';
+  render();
+}
+
+function ecpmEff(dau,dil){
+  const r=dau/START_DAU; if(r<=1) return BASE_ECPM;
+  const exp=dil===0?0.04:dil===1?0.08:0.13;
+  const floor=dil===0?0.60:dil===1?0.38:0.28;
+  return Math.max(BASE_ECPM*floor, BASE_ECPM*Math.pow(r,-exp));
+}
+
+function getUA(mo){
+  const p1v=parseFloat(document.getElementById('p1ua').value);
+  const p2v=parseFloat(document.getElementById('p2ua').value);
+  const p3v=parseFloat(document.getElementById('p3ua').value);
+  const p1=isNaN(p1v)||p1v<=0?30000:p1v;
+  const p2=isNaN(p2v)||p2v<=0?90000:p2v;
+  const p3=isNaN(p3v)||p3v<=0?240000:p3v;
+  // P2: May,Jun 각각 p2/2, P3: Jul~Dec 각각 p3/6
+  const monthly=[p1, p2/2, p2/2, p3/6, p3/6, p3/6, p3/6, p3/6, p3/6];
+  return monthly[mo];
+}
+
+// 리텐션 적분 계산 (평균 활성일수)
+function retIntegral(d1, d7, d30){
+  const seg1=(100+d1)/2*1;
+  const seg2=(d1+d7)/2*6;
+  const seg3=(d7+d30)/2*23;
+  return (seg1+seg2+seg3)/100;
+}
+// 기준 보정계수 (실측 기반)
+const BASE_CALIB = retIntegral(49.4, 16.1, 7.5); // 실측 리텐션 적분
+const BASE_LTV   = 0.9287;  // 실측 D30 LTV
+const BASE_ARPDAU_IAA = 0.3577; // 실측 ARPDAU (IAA only)
+
+function simSc(p){
+  let dau=START_DAU, rows=[], cum=0;
+  for(let i=0;i<9;i++){
+    const ua=getUA(i);
+    const cpi=p.cpi*(1+0.02*i);
+    const paid=ua/cpi;
+    const newU=paid*(1+p.organic/100);
+    // DAU 기여
+    const newDau=newU*(p.d1ret/100)*0.40;
+    dau=Math.max(dau*(p.mat/100)+newDau, START_DAU*0.15);
+
+    // LTV → ARPDAU 역산
+    const d7iaa  = p.d0iaa*(1+p.d07/100);
+    const d30iaa = d7iaa*(1+p.d730/100);
+    // 보정계수: 현재 리텐션 적분 / 실측 리텐션 적분 × 실측 보정값
+    const curIntegral = retIntegral(p.d1ret, p.d7ret, p.d30ret);
+    const calibFactor = (curIntegral / BASE_CALIB) * (BASE_LTV / BASE_ARPDAU_IAA);
+
+    // D30 IAP LTV = PUR × ARPPU
+    const d30iap = (p.pur/100)*p.arppu;
+    const d30ltv = d30iaa + d30iap;
+
+    // IAA ARPDAU: D30 IAA LTV / 보정계수
+    const iaaA = d30iaa / calibFactor;
+    // IAP ARPDAU: D30 IAP LTV / 보정계수 (IAA와 동일 기준)
+    const iapA = d30iap / calibFactor;
+    const totalArpdau = iaaA + iapA;
+
+    // eCPM 역산 (표시용)
+    const impliedEcpm = iaaA * 1000 / BASE_IMPS;
+    // eCPM 희석 적용 (볼륨 증가 시)
+    const dilFactor = ecpmEff(dau, p.dil) / BASE_ECPM;
+    const effectiveArpdau = iaaA * dilFactor + iapA;
+    const effectiveEcpm = effectiveArpdau * 1000 / BASE_IMPS;
+
+    const iaa=Math.round(dau*iaaA*dilFactor*DAYS[i]);
+    const iap=Math.round(dau*iapA*DAYS[i]);
+    const rev=iaa+iap;
+    cum+=rev;
+
+    rows.push({
+      mo:MOS[i],ph:PH[i],dau:Math.round(dau),iaa,iap,rev,ua:Math.round(ua),
+      net:Math.round(rev-ua),margin:rev>0?(rev-ua)/rev*100:0,
+      cum:Math.round(cum),
+      ecpm:+effectiveEcpm.toFixed(2),
+      arpdau:+effectiveArpdau.toFixed(4),
+      cpi:+cpi.toFixed(3),
+      d0ltv:+p.d0iaa.toFixed(3),
+      d7ltv:+d7iaa.toFixed(3),
+      d30ltv:+d30ltv.toFixed(2),
+      d30iaa:+d30iaa.toFixed(3),
+      d30iap:+d30iap.toFixed(3),
+    });
+  }
+  return rows;
+}
+
+function allSim(){return{bull:simSc(SC.bull),base:simSc(SC.base),bear:simSc(SC.bear)}}
+
+function fmt(n){const a=Math.abs(n),s=n<0?'-':'';return s+(a>=1e6?'$'+(a/1e6).toFixed(2)+'M':a>=1e3?'$'+(a/1e3).toFixed(0)+'K':'$'+Math.round(a))}
+function fmtN(n){return Math.round(+n).toLocaleString()}
+
+function updateSummaryCards(all){
+  const tv=parseFloat(document.getElementById('targetRev').value); const target=isNaN(tv)||tv<=0?10375000:tv;
+  const mgColors={bull:'var(--green)',base:'var(--blue)',bear:'var(--red)'};
+  ['bull','base','bear'].forEach(k=>{
+    const rows=all[k];
+    const ann=rows[8].cum, uaT=rows.reduce((s,r)=>s+r.ua,0), net=ann-uaT, mg=net/ann*100;
+    const pct=Math.round(ann/target*100);
+    document.getElementById(k+'-rev').textContent=fmt(ann);
+    document.getElementById(k+'-pct').textContent=pct+'%';
+    document.getElementById(k+'-gauge').style.width=Math.min(pct,100)+'%';
+    document.getElementById(k+'-meta').innerHTML=
+      `순이익 ${fmt(net)} · 마진 ${mg.toFixed(0)}%<br>`+
+      `최종 DAU ${fmtN(rows[8].dau)} · D30 LTV $${rows[8].d30ltv}`;
+    // 상단 마진율 표시
+    try{
+      const el=document.getElementById('ua-margin-'+k);
+      if(el){el.textContent=mg.toFixed(0)+'%';el.style.color=mgColors[k];}
+    }catch(e){}
+  });
+}
+
+function buildChart(id, cfg){
+  if(charts[id]) charts[id].destroy();
+  charts[id]=new Chart(document.getElementById(id), cfg);
+}
+
+function buildCompare(all){
+  const plan=PLAN_MONTHLY;
+  buildChart('compareChart',{type:'bar',data:{labels:MOS,datasets:[
+    {label:'공격안',data:all.bull.map(r=>r.rev),backgroundColor:'rgba(15,110,86,0.65)'},
+    {label:'현실안',data:all.base.map(r=>r.rev),backgroundColor:'rgba(24,95,165,0.55)'},
+    {label:'보수안',data:all.bear.map(r=>r.rev),backgroundColor:'rgba(163,45,45,0.45)'},
+    {label:'계획서',data:plan,type:'line',borderColor:'rgba(100,100,100,0.5)',borderDash:[5,3],borderWidth:1.5,pointRadius:0,fill:false},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
+    x:{ticks:{font:{size:11},autoSkip:false,maxRotation:0},grid:{display:false}},
+    y:{ticks:{font:{size:11},callback:v=>fmt(v)},grid:{color:'rgba(0,0,0,0.05)'}}
+  }}});
+}
+
+function buildCum(all){
+  const planCum=PLAN_MONTHLY.reduce((a,v,i)=>{a.push((a[i-1]||0)+v);return a},[]);
+  buildChart('cumChart',{type:'line',data:{labels:MOS,datasets:[
+    {data:all.bull.map(r=>r.cum),borderColor:'#0F6E56',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:all.base.map(r=>r.cum),borderColor:'#185FA5',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:all.bear.map(r=>r.cum),borderColor:'#A32D2D',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:planCum,borderColor:'rgba(100,100,100,0.45)',borderDash:[5,3],borderWidth:1.5,pointRadius:0,fill:false},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
+    x:{ticks:{font:{size:10},autoSkip:false,maxRotation:0},grid:{display:false}},
+    y:{ticks:{font:{size:10},callback:v=>fmt(v)},grid:{color:'rgba(0,0,0,0.05)'}}
+  }}});
+}
+
+function buildArpdau(all){
+  buildChart('arpdauChart',{type:'line',data:{labels:MOS,datasets:[
+    {data:all.bull.map(r=>r.arpdau),borderColor:'#0F6E56',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:all.base.map(r=>r.arpdau),borderColor:'#185FA5',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:all.bear.map(r=>r.arpdau),borderColor:'#A32D2D',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:MOS.map(()=>0.357),borderColor:'rgba(100,100,100,0.3)',borderDash:[3,3],borderWidth:1.5,pointRadius:0,fill:false},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
+    x:{ticks:{font:{size:10},autoSkip:false,maxRotation:0},grid:{display:false}},
+    y:{ticks:{font:{size:10},callback:v=>'$'+v.toFixed(3)},grid:{color:'rgba(0,0,0,0.05)'}}
+  }}});
+}
+
+function buildDau(all){
+  buildChart('dauChart',{type:'line',data:{labels:MOS,datasets:[
+    {data:all.bull.map(r=>r.dau),borderColor:'#0F6E56',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:all.base.map(r=>r.dau),borderColor:'#185FA5',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:all.bear.map(r=>r.dau),borderColor:'#A32D2D',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:[500,15000,30000,70000,130000,200000,250000,300000,370000],borderColor:'rgba(100,100,100,0.45)',borderDash:[5,3],borderWidth:1.5,pointRadius:0,fill:false},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
+    x:{ticks:{font:{size:10},autoSkip:false,maxRotation:0},grid:{display:false}},
+    y:{ticks:{font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{color:'rgba(0,0,0,0.05)'}}
+  }}});
+}
+
+function buildLTV(all){
+  const scKeys=['bull','base','bear'];
+  const scNames=['공격안','현실안','보수안'];
+  const scColors=['var(--green)','var(--blue)','var(--red)'];
+  let html='';
+  scKeys.forEach((k,idx)=>{
+    const p=SC[k], r=all[k][8];
+    const d7=p.d0iaa*(1+p.d07/100);
+    const d30iaa=d7*(1+p.d730/100);
+    const d30iap=p.pur/100*p.arppu;
+    const d30tot=d30iaa+d30iap;
+    const incr=d30tot-0.93;
+    const iapPct=d30tot>0?(d30iap/d30tot*100):0;
+    html+=`<div class="ltv-card" style="border-top:3px solid ${scColors[idx]}">
+      <div style="font-size:12px;font-weight:600;color:${scColors[idx]};margin-bottom:8px">${scNames[idx]}</div>
+      <div class="ltv-row"><span class="ltv-key">D0 IAA LTV</span><span class="ltv-val">$${p.d0iaa.toFixed(3)}</span></div>
+      <div class="ltv-row"><span class="ltv-key">D7 IAA LTV</span><span class="ltv-val">$${d7.toFixed(3)} <span style="font-size:10px;color:var(--text2)">(+${p.d07}%)</span></span></div>
+      <div class="ltv-row"><span class="ltv-key">D30 IAA LTV</span><span class="ltv-val">$${d30iaa.toFixed(3)} <span style="font-size:10px;color:var(--text2)">(+${p.d730}%)</span></span></div>
+      <div class="ltv-row"><span class="ltv-key">D30 IAP LTV</span><span class="ltv-val" style="color:var(--teal)">+$${d30iap.toFixed(3)}</span></div>
+      <hr style="border:none;border-top:0.5px solid var(--border);margin:6px 0">
+      <div class="ltv-row ltv-total">
+        <span>D30 합계</span>
+        <span style="color:${scColors[idx]}">$${d30tot.toFixed(2)}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
+        <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+          <div style="height:100%;border-radius:3px;display:flex">
+            <div style="width:${(100-iapPct).toFixed(1)}%;background:#3266ad"></div>
+            <div style="width:${iapPct.toFixed(1)}%;background:#1D9E75"></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text2);margin-top:3px">
+        <span><span style="display:inline-block;width:8px;height:8px;background:#3266ad;border-radius:2px;margin-right:3px"></span>IAA ${(100-iapPct).toFixed(0)}% ($${d30iaa.toFixed(2)})</span>
+        <span><span style="display:inline-block;width:8px;height:8px;background:#1D9E75;border-radius:2px;margin-right:3px"></span>IAP ${iapPct.toFixed(0)}% ($${d30iap.toFixed(2)})</span>
+      </div>
+      <div class="ltv-incr" style="color:${incr>=0?'var(--green)':'var(--red)'};margin-top:6px">현재($0.93) 대비 ${incr>=0?'+':''}$${incr.toFixed(2)}</div>
+      <div class="ltv-incr" style="color:var(--text2);margin-top:2px">D1 ${p.d1ret}% · D7 ${p.d7ret.toFixed(1)}% · D30 ${p.d30ret}%</div>
+    </div>`;
+  });
+  document.getElementById('ltv-cards').innerHTML=html;
+
+  const labels=['D0','D7','D30 IAA','D30 합계'];
+  const getData=k=>{const p=SC[k];const d7=p.d0iaa*(1+p.d07/100);const d30iaa=d7*(1+p.d730/100);return[p.d0iaa,d7,d30iaa,d30iaa+p.pur/100*p.arppu*30]};
+  buildChart('ltvChart',{type:'bar',data:{labels,datasets:[
+    {label:'공격안',data:getData('bull'),backgroundColor:'rgba(15,110,86,0.7)'},
+    {label:'현실안',data:getData('base'),backgroundColor:'rgba(24,95,165,0.6)'},
+    {label:'보수안',data:getData('bear'),backgroundColor:'rgba(163,45,45,0.5)'},
+    {label:'현재',data:[0.231,0.73,0.93,0.93],type:'line',borderColor:'rgba(100,100,100,0.55)',borderDash:[4,3],borderWidth:2,pointRadius:4,fill:false},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
+    x:{ticks:{font:{size:11}},grid:{display:false}},
+    y:{ticks:{font:{size:11},callback:v=>'$'+v.toFixed(1)},grid:{color:'rgba(0,0,0,0.05)'}}
+  }}});
+
+  buildChart('ecpmChart',{type:'line',data:{labels:MOS,datasets:[
+    {data:all.bull.map(r=>r.ecpm),borderColor:'#0F6E56',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:all.base.map(r=>r.ecpm),borderColor:'#185FA5',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:all.bear.map(r=>r.ecpm),borderColor:'#A32D2D',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:MOS.map(()=>34.1),borderColor:'rgba(100,100,100,0.3)',borderDash:[3,3],borderWidth:1.5,pointRadius:0,fill:false},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
+    x:{ticks:{font:{size:10},autoSkip:false,maxRotation:0},grid:{display:false}},
+    y:{ticks:{font:{size:10},callback:v=>'$'+v.toFixed(0)},grid:{color:'rgba(0,0,0,0.05)'},min:0}
+  }}});
+}
+
+function buildDetail(all){
+  const t=document.getElementById('detailTbl');
+  const phBadge=ph=>`<span class="ph-badge ph${ph+1}">${['P1','P2','P3'][ph]}</span>`;
+  const mc=m=>m>=60?'bg':m>=20?'bb':'br';
+
+  if(detailTab==='all'){
+    t.innerHTML=`<tr>
+      <th style="text-align:left">월</th>
+      <th colspan="3">DAU</th><th colspan="3">월매출</th>
+      <th colspan="3">ARPDAU</th><th colspan="3">마진</th><th colspan="3">D30 LTV</th>
+    </tr>
+    <tr>
+      <th style="text-align:left"></th>
+      <th style="color:#0F6E56">공격</th><th style="color:#185FA5">현실</th><th style="color:#A32D2D">보수</th>
+      <th style="color:#0F6E56">공격</th><th style="color:#185FA5">현실</th><th style="color:#A32D2D">보수</th>
+      <th style="color:#0F6E56">공격</th><th style="color:#185FA5">현실</th><th style="color:#A32D2D">보수</th>
+      <th style="color:#0F6E56">공격</th><th style="color:#185FA5">현실</th><th style="color:#A32D2D">보수</th>
+      <th style="color:#0F6E56">공격</th><th style="color:#185FA5">현실</th><th style="color:#A32D2D">보수</th>
+    </tr>`;
+    all.bull.forEach((rb,i)=>{
+      const rm=all.base[i], rw=all.bear[i];
+      const cls=i===8?' class="total-row"':'';
+      t.innerHTML+=`<tr${cls}>
+        <td>${phBadge(rb.ph)}${rb.mo}</td>
+        <td>${fmtN(rb.dau)}</td><td>${fmtN(rm.dau)}</td><td>${fmtN(rw.dau)}</td>
+        <td>${fmt(rb.rev)}</td><td>${fmt(rm.rev)}</td><td>${fmt(rw.rev)}</td>
+        <td>$${rb.arpdau}</td><td>$${rm.arpdau}</td><td>$${rw.arpdau}</td>
+        <td><span class="badge ${mc(rb.margin)}">${rb.margin.toFixed(0)}%</span></td>
+        <td><span class="badge ${mc(rm.margin)}">${rm.margin.toFixed(0)}%</span></td>
+        <td><span class="badge ${mc(rw.margin)}">${rw.margin.toFixed(0)}%</span></td>
+        <td>$${rb.d30ltv}</td><td>$${rm.d30ltv}</td><td>$${rw.d30ltv}</td>
+      </tr>`;
+    });
+    // 합계
+    ['bull','base','bear'].forEach(k=>{});
+    const sumRow=(k)=>{const r=all[k];const ann=r[8].cum,ua=r.reduce((s,v)=>s+v.ua,0);return{ann,net:ann-ua,mg:(ann-ua)/ann*100}};
+    const sb=sumRow('bull'),sm=sumRow('base'),sw=sumRow('bear');
+    t.innerHTML+=`<tr class="total-row">
+      <td><b>합계</b></td>
+      <td colspan="3"></td>
+      <td>${fmt(sb.ann)}</td><td>${fmt(sm.ann)}</td><td>${fmt(sw.ann)}</td>
+      <td colspan="3"></td>
+      <td><span class="badge ${mc(sb.mg)}">${sb.mg.toFixed(0)}%</span></td>
+      <td><span class="badge ${mc(sm.mg)}">${sm.mg.toFixed(0)}%</span></td>
+      <td><span class="badge ${mc(sw.mg)}">${sw.mg.toFixed(0)}%</span></td>
+      <td colspan="3"></td>
+    </tr>`;
+  } else {
+    const rows=all[detailTab];
+    const scName={bull:'공격안',base:'현실안',bear:'보수안'}[detailTab];
+    t.innerHTML=`<tr><th style="text-align:left">월 (${scName})</th><th>DAU</th><th>IAA</th><th>IAP</th><th>월매출</th><th>UA예산</th><th>순이익</th><th>마진</th><th>ARPDAU</th><th>eCPM</th><th>CPI</th><th>D30 LTV</th></tr>`;
+    let totRev=0,totUA=0,totNet=0;
+    rows.forEach((r,i)=>{
+      const cls=i===8?' class="total-row"':'';
+      totRev+=r.rev; totUA+=r.ua; totNet+=r.net;
+      t.innerHTML+=`<tr${cls}>
+        <td>${phBadge(r.ph)}${r.mo}</td>
+        <td>${fmtN(r.dau)}</td><td>${fmt(r.iaa)}</td><td>${fmt(r.iap)}</td>
+        <td>${fmt(r.rev)}</td><td>${fmt(r.ua)}</td><td>${fmt(r.net)}</td>
+        <td><span class="badge ${mc(r.margin)}">${r.margin.toFixed(0)}%</span></td>
+        <td>$${r.arpdau}</td><td>$${r.ecpm}</td><td>$${r.cpi}</td><td>$${r.d30ltv}</td>
+      </tr>`;
+    });
+    t.innerHTML+=`<tr class="total-row"><td><b>연간 합계</b></td><td></td><td></td><td></td><td>${fmt(totRev)}</td><td>${fmt(totUA)}</td><td>${fmt(totNet)}</td><td><span class="badge ${mc(totNet/totRev*100)}">${(totNet/totRev*100).toFixed(0)}%</span></td><td colspan="4"></td></tr>`;
+  }
+}
+
+function showDetailTab(t){
+  detailTab=t;
+  document.querySelectorAll('.detail-tab').forEach((el,i)=>el.classList.toggle('on',['all','bull','base','bear'][i]===t));
+  const all=allSim();
+  buildDetail(all);
+}
+
+function updUALabel(){
+  const p1v=parseFloat(document.getElementById('p1ua').value)||30000;
+  const p2v=parseFloat(document.getElementById('p2ua').value)||90000;
+  const p3v=parseFloat(document.getElementById('p3ua').value)||240000;
+  const fmt3=n=>'$'+Math.round(n).toLocaleString();
+  document.getElementById('p1ua-monthly').textContent=fmt3(p1v)+'/월';
+  document.getElementById('p2ua-monthly').textContent=fmt3(p2v/2)+'/월';
+  document.getElementById('p3ua-monthly').textContent=fmt3(p3v/6)+'/월';
+  document.getElementById('ua-total-label').textContent=fmt3(p1v+p2v+p3v);
+  render();
+}
+function render(){
+  // UA 월환산 레이블 업데이트
+  try{
+    const p1v=parseFloat(document.getElementById('p1ua').value)||30000;
+    const p2v=parseFloat(document.getElementById('p2ua').value)||90000;
+    const p3v=parseFloat(document.getElementById('p3ua').value)||240000;
+    const fm=n=>'$'+Math.round(n).toLocaleString();
+    document.getElementById('p1ua-monthly').textContent=fm(p1v)+'/월';
+    document.getElementById('p2ua-monthly').textContent=fm(p2v/2)+'/월';
+    document.getElementById('p3ua-monthly').textContent=fm(p3v/6)+'/월';
+    const uaTotal=p1v+p2v+p3v;
+    document.getElementById('ua-total-label').textContent=fm(uaTotal);
+  }catch(e){}
+  const all=allSim();
+  updateSummaryCards(all);
+  buildCompare(all);
+  buildCum(all);
+  buildArpdau(all);
+  buildDau(all);
+  buildLTV(all);
+  buildDetail(all);
+}
+
+function sp(sc,key,val,lid,pre,dec,suf){
+  SC[sc][key]=val;
+  document.getElementById(lid).textContent=(pre||'')+(dec>0?val.toFixed(dec):Math.round(val))+(suf||'');
+  render();
+}
+function spDil(sc,val,lid){SC[sc].dil=val;document.getElementById(lid).textContent=DIL_LABELS[val];render();}
+
+// 초기 연동 상태 적용
+['bull','base','bear'].forEach(sc=>{syncD7(sc);});
+render();
+</script>
+</body>
+</html>
