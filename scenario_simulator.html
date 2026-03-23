@@ -138,9 +138,14 @@ hr{border:none;border-top:0.5px solid var(--border);margin:14px 0}
 
 /* PHASE BADGE */
 .ph-badge{font-size:9px;padding:1px 5px;border-radius:3px;margin-right:4px;font-weight:500}
+.info-btn{display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;background:var(--border2);color:var(--text2);font-size:9px;cursor:pointer;margin-left:3px;margin-right:2px;font-style:normal;flex-shrink:0;vertical-align:middle;line-height:1}
+.info-btn:hover{background:var(--blue);color:#fff}
+.info-box{display:none;font-size:11px;color:var(--text2);background:var(--bg);border:0.5px solid var(--border);border-radius:6px;padding:7px 10px;margin-top:4px;line-height:1.6}
+.info-box.open{display:block}
 .ph1{background:var(--green-bg);color:var(--green)}
 .ph2{background:var(--amber-bg);color:var(--amber)}
 .ph3{background:var(--blue-bg);color:var(--blue)}
+.ph4{background:#EEEDFE;color:#534AB7}
 
 @media(max-width:768px){
   .sc-params-grid,.sc-summary,.kpi-grid,.two-col,.three-col{grid-template-columns:1fr}
@@ -150,7 +155,29 @@ hr{border:none;border-top:0.5px solid var(--border);margin:14px 0}
 </head>
 <body>
 <div class="page">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px">
   <div class="page-title">연간 매출 시나리오 시뮬레이터</div>
+  <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end">
+    <div style="font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:2px">파라미터 저장</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+      <div style="display:flex;align-items:center;gap:3px" id="slot-row-1">
+        <button onclick="loadSlot(0)" id="slot-btn-1" style="font-size:11px;padding:4px 10px;border:0.5px solid var(--border2);border-radius:6px;background:var(--card);cursor:pointer;color:var(--text2)">슬롯1 (비어있음)</button>
+        <button onclick="saveSlot(0)" style="font-size:11px;padding:4px 8px;border:0.5px solid var(--green-border);border-radius:6px;background:var(--green-bg);color:var(--green);cursor:pointer">저장</button>
+        <button onclick="deleteSlot(0)" id="slot-del-1" style="font-size:11px;padding:4px 6px;border:0.5px solid var(--red-border);border-radius:6px;background:var(--red-bg);color:var(--red);cursor:pointer;display:none">✕</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:3px" id="slot-row-2">
+        <button onclick="loadSlot(1)" id="slot-btn-2" style="font-size:11px;padding:4px 10px;border:0.5px solid var(--border2);border-radius:6px;background:var(--card);cursor:pointer;color:var(--text2)">슬롯2 (비어있음)</button>
+        <button onclick="saveSlot(1)" style="font-size:11px;padding:4px 8px;border:0.5px solid var(--green-border);border-radius:6px;background:var(--green-bg);color:var(--green);cursor:pointer">저장</button>
+        <button onclick="deleteSlot(1)" id="slot-del-2" style="font-size:11px;padding:4px 6px;border:0.5px solid var(--red-border);border-radius:6px;background:var(--red-bg);color:var(--red);cursor:pointer;display:none">✕</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:3px" id="slot-row-3">
+        <button onclick="loadSlot(2)" id="slot-btn-3" style="font-size:11px;padding:4px 10px;border:0.5px solid var(--border2);border-radius:6px;background:var(--card);cursor:pointer;color:var(--text2)">슬롯3 (비어있음)</button>
+        <button onclick="saveSlot(2)" style="font-size:11px;padding:4px 8px;border:0.5px solid var(--green-border);border-radius:6px;background:var(--green-bg);color:var(--green);cursor:pointer">저장</button>
+        <button onclick="deleteSlot(2)" id="slot-del-3" style="font-size:11px;padding:4px 6px;border:0.5px solid var(--red-border);border-radius:6px;background:var(--red-bg);color:var(--red);cursor:pointer;display:none">✕</button>
+      </div>
+    </div>
+  </div>
+</div>
   <div class="page-sub">계획서 기반 · 3개 시나리오 비교 · Apr~Dec 2026</div>
 
   <!-- ===== PARAMS PANEL ===== -->
@@ -163,45 +190,44 @@ hr{border:none;border-top:0.5px solid var(--border);margin:14px 0}
 
       <!-- UA Phase -->
       <div style="margin-bottom:16px">
-        <div class="sub-section-title">UA 예산 (Phase별 · 공통)</div>
-        <div class="ua-phase-grid">
-          <div class="ua-phase">
-            <div class="ua-phase-label" style="color:var(--green)">Phase 1 · Apr (소프트런치 · 1개월)</div>
-            <div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">
-              <span style="font-size:11px;color:var(--text2);min-width:44px">총예산</span>
-              <span style="font-weight:600;color:var(--text2)">$</span>
-              <input type="number" id="p1ua" value="0" step="5000" onchange="updUALabel()" onblur="updUALabel()" style="flex:1" placeholder="30000">
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:var(--green-bg);border-radius:6px">
-              <span style="font-size:11px;color:var(--green)">월 예산</span>
-              <span style="font-size:13px;font-weight:700;color:var(--green)" id="p1ua-monthly">$0/월</span>
-            </div>
-          </div>
-          <div class="ua-phase">
-            <div class="ua-phase-label" style="color:var(--amber)">Phase 2 · May~Jun (스케일업 · 2개월)</div>
-            <div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">
-              <span style="font-size:11px;color:var(--text2);min-width:44px">총예산</span>
-              <span style="font-weight:600;color:var(--text2)">$</span>
-              <input type="number" id="p2ua" value="300000" step="5000" onchange="updUALabel()" onblur="updUALabel()" style="flex:1" placeholder="90000">
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:var(--amber-bg);border-radius:6px">
-              <span style="font-size:11px;color:var(--amber)">월 예산</span>
-              <span style="font-size:13px;font-weight:700;color:var(--amber)" id="p2ua-monthly">$150,000/월</span>
-            </div>
-          </div>
-          <div class="ua-phase">
-            <div class="ua-phase-label" style="color:var(--blue)">Phase 3 · Jul~Dec (안정 운영 · 6개월)</div>
-            <div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">
-              <span style="font-size:11px;color:var(--text2);min-width:44px">총예산</span>
-              <span style="font-weight:600;color:var(--text2)">$</span>
-              <input type="number" id="p3ua" value="600000" step="10000" onchange="updUALabel()" onblur="updUALabel()" style="flex:1" placeholder="240000">
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:var(--blue-bg);border-radius:6px">
-              <span style="font-size:11px;color:var(--blue)">월 예산</span>
-              <span style="font-size:13px;font-weight:700;color:var(--blue)" id="p3ua-monthly">$100,000/월</span>
-            </div>
-          </div>
-        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;padding:10px 12px;background:var(--bg);border-radius:var(--radius)">
+         <div>
+           <div style="font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">시작월</div>
+           <select onchange="setPeriodStart(this.value)" style="width:100%;border:0.5px solid var(--border2);border-radius:6px;padding:5px 8px;font-size:12px;background:var(--card);color:var(--text);outline:none">
+             <option value="0">1월</option><option value="1">2월</option><option value="2">3월</option>
+             <option value="3" selected>4월</option><option value="4">5월</option><option value="5">6월</option>
+             <option value="6">7월</option><option value="7">8월</option><option value="8">9월</option>
+             <option value="9">10월</option><option value="10">11월</option><option value="11">12월</option>
+           </select>
+         </div>
+         <div>
+           <div style="font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">총 기간</div>
+           <div style="display:flex;align-items:center;gap:6px">
+             <input type="range" min="2" max="12" step="1" value="9" oninput="setPeriodMonths(+this.value);document.getElementById('period-months-lbl').textContent=this.value+'개월'" style="flex:1">
+             <span style="font-size:13px;font-weight:600;min-width:40px" id="period-months-lbl">9개월</span>
+           </div>
+         </div>
+         <div>
+           <div style="font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">Phase 개수</div>
+           <div style="display:flex;gap:5px">
+             <button onclick="setNumPhases(2)" id="ph-btn-2" style="flex:1;padding:5px;border:0.5px solid var(--border2);border-radius:6px;font-size:12px;cursor:pointer;background:var(--card)">2개</button>
+             <button onclick="setNumPhases(3)" id="ph-btn-3" style="flex:1;padding:5px;border:0.5px solid var(--blue-border);border-radius:6px;font-size:12px;cursor:pointer;background:var(--blue-bg);color:var(--blue);font-weight:600">3개</button>
+             <button onclick="setNumPhases(4)" id="ph-btn-4" style="flex:1;padding:5px;border:0.5px solid var(--border2);border-radius:6px;font-size:12px;cursor:pointer;background:var(--card)">4개</button>
+           </div>
+         </div>
+       </div>
+       <div style="margin-bottom:6px;display:flex;align-items:center;gap:8px">
+         <div class="sub-section-title" style="margin-bottom:0">UA 예산 (Phase별 · 공통)</div>
+         <div style="display:flex;gap:6px;margin-left:8px">
+           <span style="font-size:11px;color:var(--text2)">Phase 개월:</span>
+           <input type="number" id="ph-len-0" min="1" max="11" value="1" style="width:36px;border:0.5px solid var(--border2);border-radius:4px;padding:2px 4px;font-size:11px;text-align:center;background:var(--card);color:var(--text)" onchange="setPhaseLenInput(0,+this.value)" title="Phase 1 개월수">
+           <input type="number" id="ph-len-1" min="1" max="11" value="2" style="width:36px;border:0.5px solid var(--border2);border-radius:4px;padding:2px 4px;font-size:11px;text-align:center;background:var(--card);color:var(--text)" onchange="setPhaseLenInput(1,+this.value)" title="Phase 2 개월수">
+           <input type="number" id="ph-len-2" min="1" max="11" value="6" style="width:36px;border:0.5px solid var(--border2);border-radius:4px;padding:2px 4px;font-size:11px;text-align:center;background:var(--card);color:var(--text)" onchange="setPhaseLenInput(2,+this.value)" title="Phase 3 개월수">
+           <input type="number" id="ph-len-3" min="1" max="11" value="0" style="width:36px;border:0.5px solid var(--border2);border-radius:4px;padding:2px 4px;font-size:11px;text-align:center;background:var(--card);color:var(--text)" onchange="setPhaseLenInput(3,+this.value)" title="Phase 4 개월수">
+         </div>
+         <span style="font-size:11px;color:var(--text2);margin-left:4px" id="period-summary">Apr ~ Dec (9개월)</span>
+       </div>
+        <div id="ua-phase-container"></div>
         <div style="margin-top:10px;padding:8px 14px;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
           <span style="font-size:12px;color:var(--text2)">연간 UA 총합</span>
           <span style="font-size:15px;font-weight:700;color:var(--text)" id="ua-total-label">$900,000</span>
@@ -224,82 +250,113 @@ hr{border:none;border-top:0.5px solid var(--border);margin:14px 0}
           <div class="sc-col-title">▲ 공격안</div>
           <div class="param-group">
             <div class="param-group-title">리텐션</div>
-            <div class="ctrl"><div class="ctrl-lbl">D1 리텐션 <b id="bl-d1">55%</b></div><input type="range" min="20" max="80" step="1" value="55" oninput="sp('bull','d1ret',+this.value,'bl-d1','',0,'%');syncD7('bull')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D1 리텐션 <b id="bl-d1">55%</b></div><input type="range" min="20" max="80" step="1" value="55" oninput="sp('bull','d1ret',+this.value,'bl-d1','',1,'%');syncD7('bull')"></div>
             <div class="ctrl"><div class="ctrl-lbl">D7 리텐션 <span class="linked" id="bull-d7-link" onclick="toggleLink('bull')">D1 연동</span><b id="bl-d7">27.5%</b></div><input type="range" min="5" max="50" step="0.5" value="27.5" id="bull-d7-slider" oninput="sp('bull','d7ret',+this.value,'bl-d7','',1,'%')"></div>
             <div class="ctrl"><div class="ctrl-lbl">D30 리텐션 <span class="linked" id="bull-d30-link" onclick="toggleD30Link('bull')">D1 연동</span><b id="bl-d30">11%</b></div><input type="range" min="2" max="25" step="0.5" value="11" id="bull-d30-slider" oninput="SC.bull.d30linked=false;document.getElementById('bull-d30-link').textContent='수동';document.getElementById('bull-d30-link').style.color='var(--text2)';sp('bull','d30ret',+this.value,'bl-d30','',1,'%')"></div>
           </div>
           <div class="param-group">
-            <div class="param-group-title">LTV — IAA</div>
-            <div class="ctrl"><div class="ctrl-lbl">D0 IAA LTV <b id="bl-d0iaa">$0.257</b></div><input type="range" min="0.05" max="1.5" step="0.01" value="0.257" oninput="sp('bull','d0iaa',+this.value,'bl-d0iaa','$',2)"></div>
-            <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="bl-07">88%</b></div><input type="range" min="20" max="500" step="10" value="88" oninput="sp('bull','d07',+this.value,'bl-07','',0,'%')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="bl-730">275%</b></div><input type="range" min="0" max="500" step="5" value="275" oninput="sp('bull','d730',+this.value,'bl-730','',0,'%')"></div>
-          </div>
-          <div class="param-group">
             <div class="param-group-title">LTV — IAP</div>
-            <div class="ctrl"><div class="ctrl-lbl">PUR <b id="bl-pur">5.5%</b></div><input type="range" min="0" max="15" step="0.5" value="5.5" oninput="sp('bull','pur',+this.value,'bl-pur','',1,'%')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">ARPPU <b id="bl-ap">$11.00</b></div><input type="range" min="0.5" max="20" step="0.5" value="11" oninput="sp('bull','arppu',+this.value,'bl-ap','$',2)"></div>
+            <div class="ctrl"><div class="ctrl-lbl">PUR <b id="bull-pur">5.5%</b></div><input type="range" min="0" max="50" step="0.5" value="5.5" oninput="sp('bull','pur',+this.value,'bull-pur','',1,'%');updArppu('bull')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D0 ARPPU <b id="bull-d0ap">$5</b></div><input type="range" min="0.5" max="100" step="0.5" value="5" oninput="sp('bull','d0arppu',+this.value,'bull-d0ap','$',2);updArppu('bull')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="bull-ap07">80%</b></div><input type="range" min="0" max="500" step="10" value="80" oninput="sp('bull','arppu07',+this.value,'bull-ap07','',0,'%');updArppu('bull')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="bull-ap730">50%</b></div><input type="range" min="0" max="500" step="10" value="50" oninput="sp('bull','arppu730',+this.value,'bull-ap730','',0,'%');updArppu('bull')"></div>
+            <div style="display:flex;justify-content:space-between;padding:5px 8px;background:var(--green-bg);border-radius:6px;font-size:11px;margin-top:2px">
+              <span style="color:var(--green)">D30 ARPPU</span>
+              <span style="font-weight:700;color:var(--green)" id="bull-d30ap">$13.5</span>
+            </div>
           </div>
           <div class="param-group">
             <div class="param-group-title">UA / 광고</div>
-            <div class="ctrl"><div class="ctrl-lbl">초기 CPI <b id="bl-cpi">$0.63</b></div><input type="range" min="0.2" max="3.0" step="0.05" value="0.63" oninput="sp('bull','cpi',+this.value,'bl-cpi','$',2)"></div>
-            <div class="ctrl"><div class="ctrl-lbl">eCPM 희석 <b id="bl-dil">완만</b></div><input type="range" min="0" max="2" step="1" value="0" oninput="spDil('bull',+this.value,'bl-dil')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">오가닉 비율 <b id="bl-org">25%</b></div><input type="range" min="0" max="60" step="5" value="25" oninput="sp('bull','organic',+this.value,'bl-org','',0,'%')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">초기 CPI <b id="bull-cpi">$0.63</b></div><input type="range" min="0.2" max="3.0" step="0.05" value="0.63" oninput="sp('bull','cpi',+this.value,'bull-cpi','$',2)"></div>
+            <div class="ctrl">
+              <div class="ctrl-lbl"><span style="display:flex;align-items:center;gap:1px">기준 eCPM<span class="info-btn" onclick="toggleInfo('bull-ecpm-info')">ℹ</span></span><b id="bull-ecpmBase">$34.1</b>
+              </div>
+              <input type="range" min="5" max="80" step="0.5" value="34.1" oninput="sp('bull','ecpmBase',+this.value,'bull-ecpmBase','$',1)">
+              <div class="info-box" id="bull-ecpm-info">현재 실측 eCPM $34.1 기준. imps/DAU 10 고정 시 ARPDAU = eCPM × 10 / 1000.</div>
+            </div>
+            <div class="ctrl">
+              <div class="ctrl-lbl"><span style="display:flex;align-items:center;gap:1px">월별 eCPM 변화율<span class="info-btn" onclick="toggleInfo('bull-ecpmr-info')">ℹ</span></span><b id="bull-ecpmRate">2%/월</b>
+              </div>
+              <input type="range" min="-10" max="10" step="0.5" value="2" oninput="sp('bull','ecpmRate',+this.value,'bull-ecpmRate','',1,'%/월')">
+              <div class="info-box" id="bull-ecpmr-info">UA 스케일업 초기 신규 유저 광고 참여율 저하로 하락 가능. 네트워크 최적화 후 반등 시 양수 설정. 최저 기준 eCPM의 30%까지 하락.</div>
+            </div>
+            <div class="ctrl"><div class="ctrl-lbl">오가닉 비율 <b id="bull-org">25%</b></div><input type="range" min="0" max="60" step="5" value="25" oninput="sp('bull','organic',+this.value,'bull-org','',0,'%')"></div>
           </div>
         </div>
-
         <!-- BASE -->
         <div class="sc-col base">
           <div class="sc-col-title">— 현실안</div>
           <div class="param-group">
             <div class="param-group-title">리텐션</div>
-            <div class="ctrl"><div class="ctrl-lbl">D1 리텐션 <b id="bm-d1">50%</b></div><input type="range" min="20" max="80" step="1" value="50" oninput="sp('base','d1ret',+this.value,'bm-d1','',0,'%');syncD7('base')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D1 리텐션 <b id="bm-d1">50%</b></div><input type="range" min="20" max="80" step="1" value="50" oninput="sp('base','d1ret',+this.value,'bm-d1','',1,'%');syncD7('base')"></div>
             <div class="ctrl"><div class="ctrl-lbl">D7 리텐션 <span class="linked" id="base-d7-link" onclick="toggleLink('base')">D1 연동</span><b id="bm-d7">25%</b></div><input type="range" min="5" max="50" step="0.5" value="25" id="base-d7-slider" oninput="sp('base','d7ret',+this.value,'bm-d7','',1,'%')"></div>
             <div class="ctrl"><div class="ctrl-lbl">D30 리텐션 <span class="linked" id="base-d30-link" onclick="toggleD30Link('base')">D1 연동</span><b id="bm-d30">10%</b></div><input type="range" min="2" max="25" step="0.5" value="10" id="base-d30-slider" oninput="SC.base.d30linked=false;document.getElementById('base-d30-link').textContent='수동';document.getElementById('base-d30-link').style.color='var(--text2)';sp('base','d30ret',+this.value,'bm-d30','',1,'%')"></div>
           </div>
           <div class="param-group">
-            <div class="param-group-title">LTV — IAA</div>
-            <div class="ctrl"><div class="ctrl-lbl">D0 IAA LTV <b id="bm-d0iaa">$0.234</b></div><input type="range" min="0.05" max="1.5" step="0.01" value="0.234" oninput="sp('base','d0iaa',+this.value,'bm-d0iaa','$',2)"></div>
-            <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="bm-07">80%</b></div><input type="range" min="20" max="500" step="10" value="80" oninput="sp('base','d07',+this.value,'bm-07','',0,'%')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="bm-730">250%</b></div><input type="range" min="0" max="500" step="5" value="250" oninput="sp('base','d730',+this.value,'bm-730','',0,'%')"></div>
-          </div>
-          <div class="param-group">
             <div class="param-group-title">LTV — IAP</div>
-            <div class="ctrl"><div class="ctrl-lbl">PUR <b id="bm-pur">5%</b></div><input type="range" min="0" max="15" step="0.5" value="5" oninput="sp('base','pur',+this.value,'bm-pur','',1,'%')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">ARPPU <b id="bm-ap">$10.00</b></div><input type="range" min="0.5" max="20" step="0.5" value="10" oninput="sp('base','arppu',+this.value,'bm-ap','$',2)"></div>
+            <div class="ctrl"><div class="ctrl-lbl">PUR <b id="base-pur">5%</b></div><input type="range" min="0" max="50" step="0.5" value="5" oninput="sp('base','pur',+this.value,'base-pur','',1,'%');updArppu('base')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D0 ARPPU <b id="base-d0ap">$4</b></div><input type="range" min="0.5" max="100" step="0.5" value="4" oninput="sp('base','d0arppu',+this.value,'base-d0ap','$',2);updArppu('base')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="base-ap07">60%</b></div><input type="range" min="0" max="500" step="10" value="60" oninput="sp('base','arppu07',+this.value,'base-ap07','',0,'%');updArppu('base')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="base-ap730">30%</b></div><input type="range" min="0" max="500" step="10" value="30" oninput="sp('base','arppu730',+this.value,'base-ap730','',0,'%');updArppu('base')"></div>
+            <div style="display:flex;justify-content:space-between;padding:5px 8px;background:var(--green-bg);border-radius:6px;font-size:11px;margin-top:2px">
+              <span style="color:var(--green)">D30 ARPPU</span>
+              <span style="font-weight:700;color:var(--green)" id="base-d30ap">$8.32</span>
+            </div>
           </div>
           <div class="param-group">
             <div class="param-group-title">UA / 광고</div>
-            <div class="ctrl"><div class="ctrl-lbl">초기 CPI <b id="bm-cpi">$0.70</b></div><input type="range" min="0.2" max="3.0" step="0.05" value="0.70" oninput="sp('base','cpi',+this.value,'bm-cpi','$',2)"></div>
-            <div class="ctrl"><div class="ctrl-lbl">eCPM 희석 <b id="bm-dil">보통</b></div><input type="range" min="0" max="2" step="1" value="1" oninput="spDil('base',+this.value,'bm-dil')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">오가닉 비율 <b id="bm-org">20%</b></div><input type="range" min="0" max="60" step="5" value="20" oninput="sp('base','organic',+this.value,'bm-org','',0,'%')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">초기 CPI <b id="base-cpi">$0.7</b></div><input type="range" min="0.2" max="3.0" step="0.05" value="0.7" oninput="sp('base','cpi',+this.value,'base-cpi','$',2)"></div>
+            <div class="ctrl">
+              <div class="ctrl-lbl"><span style="display:flex;align-items:center;gap:1px">기준 eCPM<span class="info-btn" onclick="toggleInfo('base-ecpm-info')">ℹ</span></span><b id="base-ecpmBase">$34.1</b>
+              </div>
+              <input type="range" min="5" max="80" step="0.5" value="34.1" oninput="sp('base','ecpmBase',+this.value,'base-ecpmBase','$',1)">
+              <div class="info-box" id="base-ecpm-info">현재 실측 eCPM $34.1 기준. imps/DAU 10 고정 시 ARPDAU = eCPM × 10 / 1000.</div>
+            </div>
+            <div class="ctrl">
+              <div class="ctrl-lbl"><span style="display:flex;align-items:center;gap:1px">월별 eCPM 변화율<span class="info-btn" onclick="toggleInfo('base-ecpmr-info')">ℹ</span></span><b id="base-ecpmRate">-1%/월</b>
+              </div>
+              <input type="range" min="-10" max="10" step="0.5" value="-1" oninput="sp('base','ecpmRate',+this.value,'base-ecpmRate','',1,'%/월')">
+              <div class="info-box" id="base-ecpmr-info">UA 스케일업 초기 신규 유저 광고 참여율 저하로 하락 가능. 네트워크 최적화 후 반등 시 양수 설정. 최저 기준 eCPM의 30%까지 하락.</div>
+            </div>
+            <div class="ctrl"><div class="ctrl-lbl">오가닉 비율 <b id="base-org">20%</b></div><input type="range" min="0" max="60" step="5" value="20" oninput="sp('base','organic',+this.value,'base-org','',0,'%')"></div>
           </div>
         </div>
-
         <!-- BEAR -->
         <div class="sc-col bear">
           <div class="sc-col-title">▼ 보수안</div>
           <div class="param-group">
             <div class="param-group-title">리텐션</div>
-            <div class="ctrl"><div class="ctrl-lbl">D1 리텐션 <b id="bw-d1">45%</b></div><input type="range" min="20" max="80" step="1" value="45" oninput="sp('bear','d1ret',+this.value,'bw-d1','',0,'%');syncD7('bear')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D1 리텐션 <b id="bw-d1">45%</b></div><input type="range" min="20" max="80" step="1" value="45" oninput="sp('bear','d1ret',+this.value,'bw-d1','',1,'%');syncD7('bear')"></div>
             <div class="ctrl"><div class="ctrl-lbl">D7 리텐션 <span class="linked" id="bear-d7-link" onclick="toggleLink('bear')">D1 연동</span><b id="bw-d7">22.5%</b></div><input type="range" min="5" max="50" step="0.5" value="22.5" id="bear-d7-slider" oninput="sp('bear','d7ret',+this.value,'bw-d7','',1,'%')"></div>
             <div class="ctrl"><div class="ctrl-lbl">D30 리텐션 <span class="linked" id="bear-d30-link" onclick="toggleD30Link('bear')">D1 연동</span><b id="bw-d30">9%</b></div><input type="range" min="2" max="25" step="0.5" value="9" id="bear-d30-slider" oninput="SC.bear.d30linked=false;document.getElementById('bear-d30-link').textContent='수동';document.getElementById('bear-d30-link').style.color='var(--text2)';sp('bear','d30ret',+this.value,'bw-d30','',1,'%')"></div>
           </div>
           <div class="param-group">
-            <div class="param-group-title">LTV — IAA</div>
-            <div class="ctrl"><div class="ctrl-lbl">D0 IAA LTV <b id="bw-d0iaa">$0.211</b></div><input type="range" min="0.05" max="1.5" step="0.01" value="0.211" oninput="sp('bear','d0iaa',+this.value,'bw-d0iaa','$',2)"></div>
-            <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="bw-07">72%</b></div><input type="range" min="20" max="500" step="10" value="72" oninput="sp('bear','d07',+this.value,'bw-07','',0,'%')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="bw-730">225%</b></div><input type="range" min="0" max="500" step="5" value="225" oninput="sp('bear','d730',+this.value,'bw-730','',0,'%')"></div>
-          </div>
-          <div class="param-group">
             <div class="param-group-title">LTV — IAP</div>
-            <div class="ctrl"><div class="ctrl-lbl">PUR <b id="bw-pur">4.5%</b></div><input type="range" min="0" max="15" step="0.5" value="4.5" oninput="sp('bear','pur',+this.value,'bw-pur','',1,'%')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">ARPPU <b id="bw-ap">$9.00</b></div><input type="range" min="0.5" max="20" step="0.5" value="9" oninput="sp('bear','arppu',+this.value,'bw-ap','$',2)"></div>
+            <div class="ctrl"><div class="ctrl-lbl">PUR <b id="bear-pur">4.5%</b></div><input type="range" min="0" max="50" step="0.5" value="4.5" oninput="sp('bear','pur',+this.value,'bear-pur','',1,'%');updArppu('bear')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D0 ARPPU <b id="bear-d0ap">$3</b></div><input type="range" min="0.5" max="100" step="0.5" value="3" oninput="sp('bear','d0arppu',+this.value,'bear-d0ap','$',2);updArppu('bear')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="bear-ap07">40%</b></div><input type="range" min="0" max="500" step="10" value="40" oninput="sp('bear','arppu07',+this.value,'bear-ap07','',0,'%');updArppu('bear')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="bear-ap730">15%</b></div><input type="range" min="0" max="500" step="10" value="15" oninput="sp('bear','arppu730',+this.value,'bear-ap730','',0,'%');updArppu('bear')"></div>
+            <div style="display:flex;justify-content:space-between;padding:5px 8px;background:var(--green-bg);border-radius:6px;font-size:11px;margin-top:2px">
+              <span style="color:var(--green)">D30 ARPPU</span>
+              <span style="font-weight:700;color:var(--green)" id="bear-d30ap">$4.83</span>
+            </div>
           </div>
           <div class="param-group">
             <div class="param-group-title">UA / 광고</div>
-            <div class="ctrl"><div class="ctrl-lbl">초기 CPI <b id="bw-cpi">$0.77</b></div><input type="range" min="0.2" max="3.0" step="0.05" value="0.77" oninput="sp('bear','cpi',+this.value,'bw-cpi','$',2)"></div>
-            <div class="ctrl"><div class="ctrl-lbl">eCPM 희석 <b id="bw-dil">급격</b></div><input type="range" min="0" max="2" step="1" value="2" oninput="spDil('bear',+this.value,'bw-dil')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">오가닉 비율 <b id="bw-org">15%</b></div><input type="range" min="0" max="60" step="5" value="15" oninput="sp('bear','organic',+this.value,'bw-org','',0,'%')"></div>
+            <div class="ctrl"><div class="ctrl-lbl">초기 CPI <b id="bear-cpi">$0.77</b></div><input type="range" min="0.2" max="3.0" step="0.05" value="0.77" oninput="sp('bear','cpi',+this.value,'bear-cpi','$',2)"></div>
+            <div class="ctrl">
+              <div class="ctrl-lbl"><span style="display:flex;align-items:center;gap:1px">기준 eCPM<span class="info-btn" onclick="toggleInfo('bear-ecpm-info')">ℹ</span></span><b id="bear-ecpmBase">$34.1</b>
+              </div>
+              <input type="range" min="5" max="80" step="0.5" value="34.1" oninput="sp('bear','ecpmBase',+this.value,'bear-ecpmBase','$',1)">
+              <div class="info-box" id="bear-ecpm-info">현재 실측 eCPM $34.1 기준. imps/DAU 10 고정 시 ARPDAU = eCPM × 10 / 1000.</div>
+            </div>
+            <div class="ctrl">
+              <div class="ctrl-lbl"><span style="display:flex;align-items:center;gap:1px">월별 eCPM 변화율<span class="info-btn" onclick="toggleInfo('bear-ecpmr-info')">ℹ</span></span><b id="bear-ecpmRate">-4%/월</b>
+              </div>
+              <input type="range" min="-10" max="10" step="0.5" value="-4" oninput="sp('bear','ecpmRate',+this.value,'bear-ecpmRate','',1,'%/월')">
+              <div class="info-box" id="bear-ecpmr-info">UA 스케일업 초기 신규 유저 광고 참여율 저하로 하락 가능. 네트워크 최적화 후 반등 시 양수 설정. 최저 기준 eCPM의 30%까지 하락.</div>
+            </div>
+            <div class="ctrl"><div class="ctrl-lbl">오가닉 비율 <b id="bear-org">15%</b></div><input type="range" min="0" max="60" step="5" value="15" oninput="sp('bear','organic',+this.value,'bear-org','',0,'%')"></div>
           </div>
         </div>
       </div>
@@ -410,29 +467,478 @@ hr{border:none;border-top:0.5px solid var(--border);margin:14px 0}
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-const MOS=['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const DAYS=[30,31,30,31,31,30,31,30,31];
-const PH=[0,1,1,2,2,2,2,2,2];
+// ============================================================
+// 상수
+// ============================================================
+const ALL_MO_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const ALL_MO_DAYS=[31,28,31,30,31,30,31,31,30,31,30,31];
 const BASE_ECPM=34.1, BASE_IMPS=10.0, START_DAU=308;
-const DIL_LABELS=['완만','보통','급격'];
 const PLAN_MONTHLY=[45000,135000,252000,660000,1120000,1680000,1950000,2050000,2480000];
+const SLOT_KEYS=['sim_slot_1','sim_slot_2','sim_slot_3'];
+const PH_COLORS=['var(--green)','var(--amber)','var(--blue)','#534AB7'];
+const PH_BG=['var(--green-bg)','var(--amber-bg)','var(--blue-bg)','#EEEDFE'];
+const PH_NAMES=['소프트런치','스케일업','안정 운영','확장'];
+const UA_DEFAULTS=[0,300000,600000,100000];
 
-let SC={
-  bull:{d1ret:55,d7ret:27.5,d30ret:11,d0iaa:0.257,d07:88,d730:275,pur:5.5,arppu:11,cpi:0.63,dil:0,organic:25,mat:82,d7linked:true,d30linked:true},
-  base:{d1ret:50,d7ret:25,d30ret:10,d0iaa:0.234,d07:80,d730:250,pur:5,arppu:10,cpi:0.70,dil:1,organic:20,mat:80,d7linked:true,d30linked:true},
-  bear:{d1ret:45,d7ret:22.5,d30ret:9,d0iaa:0.211,d07:72,d730:225,pur:4.5,arppu:9,cpi:0.77,dil:2,organic:15,mat:78,d7linked:true,d30linked:true},
+// ============================================================
+// 상태
+// ============================================================
+let PERIOD = {
+  startMonth:3, totalMonths:9, numPhases:3, phaseLens:[1,2,6]
+};
+let SC = {
+  bull:{d1ret:55,d7ret:27.5,d30ret:11,pur:5.5,d0arppu:5,arppu07:80,arppu730:50,
+        cpi:0.63,ecpmBase:34.1,ecpmRate:2,organic:25,mat:82,d7linked:true,d30linked:true},
+  base:{d1ret:50,d7ret:25,  d30ret:10,pur:5,  d0arppu:4,arppu07:60,arppu730:30,
+        cpi:0.70,ecpmBase:34.1,ecpmRate:-1,organic:20,mat:80,d7linked:true,d30linked:true},
+  bear:{d1ret:45,d7ret:22.5,d30ret:9, pur:4.5,d0arppu:3,arppu07:40,arppu730:15,
+        cpi:0.77,ecpmBase:34.1,ecpmRate:-4,organic:15,mat:78,d7linked:true,d30linked:true},
 };
 let detailTab='all';
 let charts={};
 
+// ============================================================
+// 기간/Phase 헬퍼
+// ============================================================
+function getMOS(){
+  const arr=[];
+  for(let i=0;i<PERIOD.totalMonths;i++) arr.push(ALL_MO_NAMES[(PERIOD.startMonth+i)%12]);
+  return arr;
+}
+function getDAYS(){
+  const arr=[];
+  for(let i=0;i<PERIOD.totalMonths;i++) arr.push(ALL_MO_DAYS[(PERIOD.startMonth+i)%12]);
+  return arr;
+}
+function getPhaseLens(){
+  const n=PERIOD.numPhases;
+  const lens=[...PERIOD.phaseLens.slice(0,n)];
+  while(lens.length<n) lens.push(1);
+  // 마지막 Phase는 남은 개월 수
+  const sumFront=lens.slice(0,-1).reduce((a,b)=>a+b,0);
+  lens[n-1]=Math.max(1, PERIOD.totalMonths-sumFront);
+  return lens;
+}
+function getPH(){
+  const lens=getPhaseLens();
+  const arr=[];
+  for(let p=0;p<lens.length;p++) for(let m=0;m<lens[p];m++) arr.push(p);
+  return arr.slice(0,PERIOD.totalMonths);
+}
+function getMonthlyUA(phIdx){
+  const el=document.getElementById('p'+(phIdx+1)+'ua');
+  const total=parseFloat(el?el.value:UA_DEFAULTS[phIdx])||0;
+  const len=getPhaseLens()[phIdx]||1;
+  return total/len;
+}
+function getUA(moIdx){
+  return getMonthlyUA(getPH()[moIdx]);
+}
+
+// ============================================================
+// LTV / 보정 계수
+// ============================================================
+function retIntegral(d1,d7,d30){
+  return ((100+d1)/2*1 + (d1+d7)/2*6 + (d7+d30)/2*23)/100;
+}
+const BASE_CALIB=retIntegral(49.4,16.1,7.5);
+const BASE_LTV=0.9287;
+const BASE_ARPDAU_IAA=0.3577;
+
+// ============================================================
+// 시뮬레이션
+// ============================================================
+function simSc(p){
+  const MOS=getMOS(), DAYS=getDAYS(), PH=getPH();
+  let dau=START_DAU, rows=[], cum=0, ecpm=p.ecpmBase;
+  for(let i=0;i<PERIOD.totalMonths;i++){
+    const ua=getUA(i);
+    const cpi=p.cpi*(1+0.02*i);
+    const paid=cpi>0?ua/cpi:0;
+    const newU=paid*(1+p.organic/100);
+    dau=Math.max(dau*(p.mat/100)+newU*(p.d1ret/100)*0.40, START_DAU*0.15);
+    ecpm=Math.max(ecpm*(1+p.ecpmRate/100), p.ecpmBase*0.3);
+    const iaaArpdau=ecpm*BASE_IMPS/1000;
+    const d7arppu=p.d0arppu*(1+p.arppu07/100);
+    const d30arppu=d7arppu*(1+p.arppu730/100);
+    const calib=(retIntegral(p.d1ret,p.d7ret,p.d30ret)/BASE_CALIB)*(BASE_LTV/BASE_ARPDAU_IAA);
+    const d30iap=(p.pur/100)*d30arppu;
+    const iapArpdau=d30iap/calib;
+    const iaa=Math.round(dau*iaaArpdau*DAYS[i]);
+    const iap=Math.round(dau*iapArpdau*DAYS[i]);
+    const rev=iaa+iap;
+    cum+=rev;
+    rows.push({
+      mo:MOS[i], ph:PH[i], dau:Math.round(dau),
+      iaa, iap, rev, ua:Math.round(ua),
+      net:Math.round(rev-ua),
+      margin:rev>0?(rev-ua)/rev*100:0,
+      cum:Math.round(cum),
+      ecpm:+ecpm.toFixed(2),
+      arpdau:+(iaaArpdau+iapArpdau).toFixed(4),
+      cpi:+cpi.toFixed(3),
+      d30arppu:+d30arppu.toFixed(2),
+      d30iap:+d30iap.toFixed(3),
+      d30ltv:+(p.ecpmBase*BASE_IMPS/1000*calib + d30iap).toFixed(2),
+    });
+  }
+  return rows;
+}
+function allSim(){
+  return {bull:simSc(SC.bull), base:simSc(SC.base), bear:simSc(SC.bear)};
+}
+
+// ============================================================
+// 포맷
+// ============================================================
+function fmt(n){
+  const a=Math.abs(n), s=n<0?'-':'';
+  return s+(a>=1e6?'$'+(a/1e6).toFixed(2)+'M':a>=1e3?'$'+(a/1e3).toFixed(0)+'K':'$'+Math.round(a));
+}
+function fmtN(n){return Math.round(+n).toLocaleString();}
+
+// ============================================================
+// 차트
+// ============================================================
+function buildChart(id,cfg){
+  if(charts[id]) charts[id].destroy();
+  charts[id]=new Chart(document.getElementById(id),cfg);
+}
+const CH_OPT=(stacked)=>({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+  scales:{x:{stacked:!!stacked,ticks:{font:{size:11},autoSkip:false,maxRotation:0},grid:{display:false}},
+          y:{stacked:!!stacked,ticks:{font:{size:11},callback:v=>fmt(v)},grid:{color:'rgba(0,0,0,0.05)'}}}});
+
+function buildCompare(all){
+  const n=PERIOD.totalMonths;
+  const plan=PLAN_MONTHLY.slice(0,n).concat(new Array(Math.max(0,n-PLAN_MONTHLY.length)).fill(0));
+  buildChart('compareChart',{type:'bar',data:{labels:getMOS(),datasets:[
+    {label:'공격안',data:all.bull.map(r=>r.rev),backgroundColor:'rgba(15,110,86,0.65)'},
+    {label:'현실안',data:all.base.map(r=>r.rev),backgroundColor:'rgba(24,95,165,0.55)'},
+    {label:'보수안',data:all.bear.map(r=>r.rev),backgroundColor:'rgba(163,45,45,0.45)'},
+    {label:'계획서',data:plan,type:'line',borderColor:'rgba(100,100,100,0.5)',borderDash:[5,3],borderWidth:1.5,pointRadius:0,fill:false},
+  ]},options:CH_OPT()});
+}
+function buildCum(all){
+  const n=PERIOD.totalMonths;
+  const planArr=PLAN_MONTHLY.slice(0,n).concat(new Array(Math.max(0,n-PLAN_MONTHLY.length)).fill(0));
+  const planCum=planArr.reduce((a,v,i)=>{a.push((a[i-1]||0)+v);return a;},[]);
+  buildChart('cumChart',{type:'line',data:{labels:getMOS(),datasets:[
+    {data:all.bull.map(r=>r.cum),borderColor:'#0F6E56',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:all.base.map(r=>r.cum),borderColor:'#185FA5',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:all.bear.map(r=>r.cum),borderColor:'#A32D2D',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:planCum,borderColor:'rgba(100,100,100,0.45)',borderDash:[5,3],borderWidth:1.5,pointRadius:0,fill:false},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
+    x:{ticks:{font:{size:10},autoSkip:false,maxRotation:0},grid:{display:false}},
+    y:{ticks:{font:{size:10},callback:v=>fmt(v)},grid:{color:'rgba(0,0,0,0.05)'}}}}});
+}
+function buildArpdau(all){
+  buildChart('arpdauChart',{type:'line',data:{labels:getMOS(),datasets:[
+    {data:all.bull.map(r=>r.arpdau),borderColor:'#0F6E56',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:all.base.map(r=>r.arpdau),borderColor:'#185FA5',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:all.bear.map(r=>r.arpdau),borderColor:'#A32D2D',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:getMOS().map(()=>0.357),borderColor:'rgba(100,100,100,0.3)',borderDash:[3,3],borderWidth:1.5,pointRadius:0,fill:false},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
+    x:{ticks:{font:{size:10},autoSkip:false,maxRotation:0},grid:{display:false}},
+    y:{ticks:{font:{size:10},callback:v=>'$'+v.toFixed(3)},grid:{color:'rgba(0,0,0,0.05)'}}}}});
+}
+function buildDau(all){
+  buildChart('dauChart',{type:'line',data:{labels:getMOS(),datasets:[
+    {data:all.bull.map(r=>r.dau),borderColor:'#0F6E56',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:all.base.map(r=>r.dau),borderColor:'#185FA5',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:all.bear.map(r=>r.dau),borderColor:'#A32D2D',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
+    x:{ticks:{font:{size:10},autoSkip:false,maxRotation:0},grid:{display:false}},
+    y:{ticks:{font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{color:'rgba(0,0,0,0.05)'}}}}});
+}
+function buildLTV(all){
+  const scKeys=['bull','base','bear'];
+  const scNames=['공격안','현실안','보수안'];
+  const scColors=['var(--green)','var(--blue)','var(--red)'];
+  let h='';
+  scKeys.forEach((k,idx)=>{
+    const p=SC[k];
+    const d7ap=p.d0arppu*(1+p.arppu07/100);
+    const d30ap=d7ap*(1+p.arppu730/100);
+    const d30iap=(p.pur/100)*d30ap;
+    const calib=(retIntegral(p.d1ret,p.d7ret,p.d30ret)/BASE_CALIB)*(BASE_LTV/BASE_ARPDAU_IAA);
+    const d30iaa=p.ecpmBase*BASE_IMPS/1000*calib;
+    const d30tot=d30iaa+d30iap;
+    const iapPct=d30tot>0?d30iap/d30tot*100:0;
+    const incr=d30tot-0.93;
+    h+=`<div class="ltv-card" style="border-top:3px solid ${scColors[idx]}">
+      <div style="font-size:12px;font-weight:600;color:${scColors[idx]};margin-bottom:8px">${scNames[idx]}</div>
+      <div class="ltv-row"><span class="ltv-key">D0 ARPPU</span><span class="ltv-val">$${p.d0arppu.toFixed(2)}</span></div>
+      <div class="ltv-row"><span class="ltv-key">D7 ARPPU</span><span class="ltv-val">$${d7ap.toFixed(2)} <span style="font-size:10px;color:var(--text2)">(+${p.arppu07}%)</span></span></div>
+      <div class="ltv-row"><span class="ltv-key">D30 ARPPU</span><span class="ltv-val">$${d30ap.toFixed(2)} <span style="font-size:10px;color:var(--text2)">(+${p.arppu730}%)</span></span></div>
+      <div class="ltv-row"><span class="ltv-key">D30 IAP LTV</span><span class="ltv-val" style="color:var(--teal)">$${d30iap.toFixed(3)} (PUR ${p.pur}%)</span></div>
+      <div class="ltv-row"><span class="ltv-key">D30 IAA LTV</span><span class="ltv-val">$${d30iaa.toFixed(3)}</span></div>
+      <hr style="border:none;border-top:0.5px solid var(--border);margin:6px 0">
+      <div class="ltv-row ltv-total"><span>D30 합계</span><span style="color:${scColors[idx]}">$${d30tot.toFixed(2)}</span></div>
+      <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin:6px 0">
+        <div style="height:100%;border-radius:3px;display:flex">
+          <div style="width:${(100-iapPct).toFixed(1)}%;background:#3266ad"></div>
+          <div style="width:${iapPct.toFixed(1)}%;background:#1D9E75"></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text2)">
+        <span><span style="display:inline-block;width:8px;height:8px;background:#3266ad;border-radius:2px;margin-right:3px"></span>IAA ${(100-iapPct).toFixed(0)}%</span>
+        <span><span style="display:inline-block;width:8px;height:8px;background:#1D9E75;border-radius:2px;margin-right:3px"></span>IAP ${iapPct.toFixed(0)}%</span>
+      </div>
+      <div class="ltv-incr" style="color:${incr>=0?'var(--green)':'var(--red)'};margin-top:6px">현재($0.93) 대비 ${incr>=0?'+':''}$${incr.toFixed(2)}</div>
+      <div class="ltv-incr" style="color:var(--text2);margin-top:2px">D1 ${p.d1ret}% · D7 ${p.d7ret.toFixed(1)}% · D30 ${p.d30ret}%</div>
+    </div>`;
+  });
+  document.getElementById('ltv-cards').innerHTML=h;
+  // eCPM 차트
+  buildChart('ecpmChart',{type:'line',data:{labels:getMOS(),datasets:[
+    {data:simSc(SC.bull).map(r=>r.ecpm),borderColor:'#0F6E56',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:simSc(SC.base).map(r=>r.ecpm),borderColor:'#185FA5',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:simSc(SC.bear).map(r=>r.ecpm),borderColor:'#A32D2D',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:getMOS().map(()=>34.1),borderColor:'rgba(100,100,100,0.3)',borderDash:[3,3],borderWidth:1.5,pointRadius:0,fill:false},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
+    x:{ticks:{font:{size:10},autoSkip:false,maxRotation:0},grid:{display:false}},
+    y:{ticks:{font:{size:10},callback:v=>'$'+v.toFixed(0)},grid:{color:'rgba(0,0,0,0.05)'},min:0}}}});
+}
+
+// ============================================================
+// Summary Cards
+// ============================================================
+function updateSummaryCards(all){
+  const tv=parseFloat(document.getElementById('targetRev').value);
+  const target=isNaN(tv)||tv<=0?10375000:tv;
+  const mgColors={bull:'var(--green)',base:'var(--blue)',bear:'var(--red)'};
+  ['bull','base','bear'].forEach(k=>{
+    const rows=all[k];
+    const last=rows[rows.length-1];
+    const ann=last.cum;
+    const uaT=rows.reduce((s,r)=>s+r.ua,0);
+    const net=ann-uaT, mg=net/ann*100;
+    const pct=Math.round(ann/target*100);
+    document.getElementById(k+'-rev').textContent=fmt(ann);
+    document.getElementById(k+'-pct').textContent=pct+'%';
+    document.getElementById(k+'-gauge').style.width=Math.min(pct,100)+'%';
+    document.getElementById(k+'-meta').innerHTML=
+      `순이익 ${fmt(net)} · 마진 ${mg.toFixed(0)}%<br>최종 DAU ${fmtN(last.dau)} · D30 LTV $${last.d30ltv}`;
+    const el=document.getElementById('ua-margin-'+k);
+    if(el){el.textContent=mg.toFixed(0)+'%';el.style.color=mgColors[k];}
+  });
+}
+
+// ============================================================
+// Detail Table
+// ============================================================
+function buildDetail(all){
+  const t=document.getElementById('detailTbl');
+  const phBadge=ph=>`<span class="ph-badge ph${Math.min(ph+1,4)}">${'P'+(ph+1)}</span>`;
+  const mc=m=>m>=60?'bg':m>=20?'bb':'br';
+  if(detailTab==='all'){
+    const n=all.bull.length;
+    t.innerHTML=`<tr>
+      <th style="text-align:left">월</th>
+      <th colspan="3">DAU</th><th colspan="3">월매출</th>
+      <th colspan="3">ARPDAU</th><th colspan="3">마진</th><th colspan="3">D30 LTV</th>
+    </tr><tr>
+      <th style="text-align:left"></th>
+      <th style="color:#0F6E56">공격</th><th style="color:#185FA5">현실</th><th style="color:#A32D2D">보수</th>
+      <th style="color:#0F6E56">공격</th><th style="color:#185FA5">현실</th><th style="color:#A32D2D">보수</th>
+      <th style="color:#0F6E56">공격</th><th style="color:#185FA5">현실</th><th style="color:#A32D2D">보수</th>
+      <th style="color:#0F6E56">공격</th><th style="color:#185FA5">현실</th><th style="color:#A32D2D">보수</th>
+      <th style="color:#0F6E56">공격</th><th style="color:#185FA5">현실</th><th style="color:#A32D2D">보수</th>
+    </tr>`;
+    all.bull.forEach((rb,i)=>{
+      const rm=all.base[i], rw=all.bear[i];
+      const cls=i===n-1?' class="total-row"':'';
+      t.innerHTML+=`<tr${cls}>
+        <td>${phBadge(rb.ph)}${rb.mo}</td>
+        <td>${fmtN(rb.dau)}</td><td>${fmtN(rm.dau)}</td><td>${fmtN(rw.dau)}</td>
+        <td>${fmt(rb.rev)}</td><td>${fmt(rm.rev)}</td><td>${fmt(rw.rev)}</td>
+        <td>$${rb.arpdau}</td><td>$${rm.arpdau}</td><td>$${rw.arpdau}</td>
+        <td><span class="badge ${mc(rb.margin)}">${rb.margin.toFixed(0)}%</span></td>
+        <td><span class="badge ${mc(rm.margin)}">${rm.margin.toFixed(0)}%</span></td>
+        <td><span class="badge ${mc(rw.margin)}">${rw.margin.toFixed(0)}%</span></td>
+        <td>$${rb.d30ltv}</td><td>$${rm.d30ltv}</td><td>$${rw.d30ltv}</td>
+      </tr>`;
+    });
+    const sv=(k)=>{const r=all[k],ann=r[r.length-1].cum,ua=r.reduce((s,v)=>s+v.ua,0);return{ann,net:ann-ua,mg:(ann-ua)/ann*100};};
+    const sb=sv('bull'),sm=sv('base'),sw=sv('bear');
+    t.innerHTML+=`<tr class="total-row">
+      <td><b>합계</b></td><td colspan="3"></td>
+      <td>${fmt(sb.ann)}</td><td>${fmt(sm.ann)}</td><td>${fmt(sw.ann)}</td>
+      <td colspan="3"></td>
+      <td><span class="badge ${mc(sb.mg)}">${sb.mg.toFixed(0)}%</span></td>
+      <td><span class="badge ${mc(sm.mg)}">${sm.mg.toFixed(0)}%</span></td>
+      <td><span class="badge ${mc(sw.mg)}">${sw.mg.toFixed(0)}%</span></td>
+      <td colspan="3"></td>
+    </tr>`;
+  } else {
+    const rows=all[detailTab];
+    const n=rows.length;
+    const scName={bull:'공격안',base:'현실안',bear:'보수안'}[detailTab];
+    t.innerHTML=`<tr><th style="text-align:left">월 (${scName})</th><th>DAU</th><th>IAA</th><th>IAP</th><th>월매출</th><th>UA예산</th><th>순이익</th><th>마진</th><th>ARPDAU</th><th>eCPM</th><th>CPI</th><th>D30 LTV</th></tr>`;
+    let totRev=0,totUA=0,totNet=0;
+    rows.forEach((r,i)=>{
+      const cls=i===n-1?' class="total-row"':'';
+      totRev+=r.rev; totUA+=r.ua; totNet+=r.net;
+      t.innerHTML+=`<tr${cls}>
+        <td>${phBadge(r.ph)}${r.mo}</td>
+        <td>${fmtN(r.dau)}</td><td>${fmt(r.iaa)}</td><td>${fmt(r.iap)}</td>
+        <td>${fmt(r.rev)}</td><td>${fmt(r.ua)}</td><td>${fmt(r.net)}</td>
+        <td><span class="badge ${mc(r.margin)}">${r.margin.toFixed(0)}%</span></td>
+        <td>$${r.arpdau}</td><td>$${r.ecpm}</td><td>$${r.cpi}</td><td>$${r.d30ltv}</td>
+      </tr>`;
+    });
+    t.innerHTML+=`<tr class="total-row"><td><b>합계</b></td><td></td><td></td><td></td><td>${fmt(totRev)}</td><td>${fmt(totUA)}</td><td>${fmt(totNet)}</td><td><span class="badge ${mc(totNet/totRev*100)}">${(totNet/totRev*100).toFixed(0)}%</span></td><td colspan="4"></td></tr>`;
+  }
+}
+function showDetailTab(tab){
+  detailTab=tab;
+  document.querySelectorAll('.detail-tab').forEach((el,i)=>el.classList.toggle('on',['all','bull','base','bear'][i]===tab));
+  buildDetail(allSim());
+}
+
+// ============================================================
+// 메인 render
+// ============================================================
+function render(){
+  const all=allSim();
+  updateSummaryCards(all);
+  buildCompare(all);
+  buildCum(all);
+  buildArpdau(all);
+  buildDau(all);
+  if(document.getElementById('ltv-cards').offsetParent!==null) buildLTV(all);
+  buildDetail(all);
+}
+
+// ============================================================
+// 기간 설정
+// ============================================================
+function setPeriodStart(v){PERIOD.startMonth=+v;renderUASection();rebuildPeriod();}
+function setPeriodMonths(v){
+  PERIOD.totalMonths=+v;
+  document.getElementById('period-months-lbl').textContent=v+'개월';
+  fixPhaseLens();renderUASection();rebuildPeriod();
+}
+function setNumPhases(v){
+  PERIOD.numPhases=+v;
+  while(PERIOD.phaseLens.length<v) PERIOD.phaseLens.push(1);
+  PERIOD.phaseLens=PERIOD.phaseLens.slice(0,v);
+  fixPhaseLens();updPhBtns();renderUASection();rebuildPeriod();
+}
+function setPhaseLenInput(phIdx,v){
+  PERIOD.phaseLens[phIdx]=Math.max(1,+v);
+  fixPhaseLens();renderUASection();rebuildPeriod();
+}
+function fixPhaseLens(){
+  const n=PERIOD.numPhases;
+  while(PERIOD.phaseLens.length<n) PERIOD.phaseLens.push(1);
+  PERIOD.phaseLens=PERIOD.phaseLens.slice(0,n);
+  let sum=0;
+  for(let i=0;i<n-1;i++){
+    PERIOD.phaseLens[i]=Math.max(1,Math.min(PERIOD.phaseLens[i],PERIOD.totalMonths-sum-(n-1-i)));
+    sum+=PERIOD.phaseLens[i];
+  }
+}
+function rebuildPeriod(){renderPeriodSummary();render();}
+function renderPeriodSummary(){
+  const mos=getMOS();
+  const el=document.getElementById('period-summary');
+  if(el) el.textContent=mos[0]+' ~ '+mos[mos.length-1]+' ('+PERIOD.totalMonths+'개월)';
+}
+function updPhBtns(){
+  [2,3,4].forEach(n=>{
+    const btn=document.getElementById('ph-btn-'+n);
+    if(!btn) return;
+    const on=PERIOD.numPhases===n;
+    btn.style.background=on?'var(--blue-bg)':'var(--card)';
+    btn.style.color=on?'var(--blue)':'var(--text)';
+    btn.style.fontWeight=on?'600':'400';
+    btn.style.borderColor=on?'var(--blue-border)':'var(--border2)';
+  });
+  for(let i=0;i<4;i++){
+    const inp=document.getElementById('ph-len-'+i);
+    if(inp) inp.style.display=i<PERIOD.numPhases?'':'none';
+  }
+}
+
+// ============================================================
+// UA 섹션 동적 렌더링
+// ============================================================
+function renderUASection(){
+  const lens=getPhaseLens();
+  const mos=getMOS();
+  let h='<div class="ua-phase-grid" style="grid-template-columns:repeat('+PERIOD.numPhases+',minmax(0,1fr))">';
+  let moStart=0;
+  for(let i=0;i<PERIOD.numPhases;i++){
+    const len=lens[i];
+    const moEnd=moStart+len-1;
+    const moLabel=len===1?mos[moStart]:(mos[moStart]||'')+'~'+(mos[Math.min(moEnd,mos.length-1)]||'');
+    const curEl=document.getElementById('p'+(i+1)+'ua');
+    const curVal=curEl?curEl.value:(UA_DEFAULTS[i]||50000);
+    const monthly=Math.round((parseFloat(curVal)||0)/len);
+    h+=`<div class="ua-phase" style="border-top:2px solid ${PH_COLORS[i]}">
+      <div class="ua-phase-label" style="color:${PH_COLORS[i]}">PHASE ${i+1} · ${moLabel} (${PH_NAMES[i]||'Phase'+(i+1)} · ${len}개월)</div>
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">
+        <span style="font-size:11px;color:var(--text2);min-width:44px">총예산</span>
+        <span style="font-weight:600;color:var(--text2)">$</span>
+        <input type="number" id="p${i+1}ua" value="${curVal}" step="5000" onchange="updUALabel()" onblur="updUALabel()" style="flex:1" placeholder="${UA_DEFAULTS[i]||50000}">
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:${PH_BG[i]};border-radius:6px">
+        <span style="font-size:11px;color:${PH_COLORS[i]}">월 예산</span>
+        <span style="font-size:13px;font-weight:700;color:${PH_COLORS[i]}" id="p${i+1}ua-monthly">$${monthly.toLocaleString()}/월</span>
+      </div>
+    </div>`;
+    moStart+=len;
+  }
+  h+='</div>';
+  const container=document.getElementById('ua-phase-container');
+  if(container) container.innerHTML=h;
+  updUALabel();
+}
+function updUALabel(){
+  const lens=getPhaseLens();
+  let total=0;
+  for(let i=0;i<PERIOD.numPhases;i++){
+    const el=document.getElementById('p'+(i+1)+'ua');
+    const v=parseFloat(el?el.value:0)||0;
+    const mo_el=document.getElementById('p'+(i+1)+'ua-monthly');
+    if(mo_el) mo_el.textContent='$'+(Math.round(v/(lens[i]||1))).toLocaleString()+'/월';
+    total+=v;
+  }
+  const totEl=document.getElementById('ua-total-label');
+  if(totEl) totEl.textContent='$'+total.toLocaleString();
+  render();
+}
+
+// ============================================================
+// 파라미터 슬라이더
+// ============================================================
+function sp(sc,key,val,lid,pre,dec,suf){
+  SC[sc][key]=val;
+  const d=dec!==undefined?+dec:0;
+  document.getElementById(lid).textContent=(pre||'')+(d>0?val.toFixed(d):Math.round(val))+(suf||'');
+  render();
+}
+function updArppu(sc){
+  const p=SC[sc];
+  const d7=p.d0arppu*(1+p.arppu07/100);
+  const d30=d7*(1+p.arppu730/100);
+  const ids={bull:'bull-d30ap',base:'base-d30ap',bear:'bear-d30ap'};
+  const el=document.getElementById(ids[sc]);
+  if(el) el.textContent='$'+d30.toFixed(2);
+}
+function toggleInfo(id){
+  const el=document.getElementById(id);
+  if(el) el.classList.toggle('open');
+}
 function toggleParams(){
   const body=document.getElementById('params-body');
   const icon=document.getElementById('toggle-icon');
   body.classList.toggle('open');
   icon.classList.toggle('open');
 }
-
 function toggleLink(sc){
   SC[sc].d7linked=!SC[sc].d7linked;
   const el=document.getElementById(sc+'-d7-link');
@@ -447,380 +953,126 @@ function toggleD30Link(sc){
   el.style.color=SC[sc].d30linked?'var(--teal)':'var(--text2)';
   if(SC[sc].d30linked) syncD30(sc);
 }
-
 function syncD7(sc){
   if(!SC[sc].d7linked) return;
-  const d7=SC[sc].d1ret*0.5;
+  const d7=+(SC[sc].d1ret*0.5).toFixed(1);
   SC[sc].d7ret=d7;
-  const slMap={bull:'bull-d7-slider',base:'base-d7-slider',bear:'bear-d7-slider'};
-  const lblMap={bull:'bl-d7',base:'bm-d7',bear:'bw-d7'};
-  document.getElementById(slMap[sc]).value=d7;
-  document.getElementById(lblMap[sc]).textContent=d7.toFixed(1)+'%';
+  const sl=document.getElementById(sc+'-d7-slider');
+  const lbl=document.getElementById({bull:'bl-d7',base:'bm-d7',bear:'bw-d7'}[sc]);
+  if(sl) sl.value=d7;
+  if(lbl) lbl.textContent=d7+'%';
   syncD30(sc);
 }
 function syncD30(sc){
   if(!SC[sc].d30linked) return;
-  const d30=SC[sc].d1ret*0.2;
+  const d30=+(SC[sc].d1ret*0.2).toFixed(1);
   SC[sc].d30ret=d30;
-  const slMap={bull:'bull-d30-slider',base:'base-d30-slider',bear:'bear-d30-slider'};
-  const lblMap={bull:'bl-d30',base:'bm-d30',bear:'bw-d30'};
-  document.getElementById(slMap[sc]).value=d30;
-  document.getElementById(lblMap[sc]).textContent=d30.toFixed(1)+'%';
+  const sl=document.getElementById(sc+'-d30-slider');
+  const lbl=document.getElementById({bull:'bl-d30',base:'bm-d30',bear:'bw-d30'}[sc]);
+  if(sl) sl.value=d30;
+  if(lbl) lbl.textContent=d30+'%';
   render();
 }
 
-function ecpmEff(dau,dil){
-  const r=dau/START_DAU; if(r<=1) return BASE_ECPM;
-  const exp=dil===0?0.04:dil===1?0.08:0.13;
-  const floor=dil===0?0.60:dil===1?0.38:0.28;
-  return Math.max(BASE_ECPM*floor, BASE_ECPM*Math.pow(r,-exp));
+// ============================================================
+// 저장/불러오기
+// ============================================================
+function getSlotData(){
+  const uas={};
+  for(let i=1;i<=4;i++){const el=document.getElementById('p'+i+'ua');if(el)uas[i]=el.value;}
+  return {
+    SC:JSON.parse(JSON.stringify(SC)),
+    PERIOD:JSON.parse(JSON.stringify(PERIOD)),
+    uas,
+    targetRev:document.getElementById('targetRev').value,
+    ts:new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})
+  };
 }
-
-function getUA(mo){
-  const p1v=parseFloat(document.getElementById('p1ua').value);
-  const p2v=parseFloat(document.getElementById('p2ua').value);
-  const p3v=parseFloat(document.getElementById('p3ua').value);
-  const p1=isNaN(p1v)||p1v<=0?30000:p1v;
-  const p2=isNaN(p2v)||p2v<=0?90000:p2v;
-  const p3=isNaN(p3v)||p3v<=0?240000:p3v;
-  // P2: May,Jun 각각 p2/2, P3: Jul~Dec 각각 p3/6
-  const monthly=[p1, p2/2, p2/2, p3/6, p3/6, p3/6, p3/6, p3/6, p3/6];
-  return monthly[mo];
+function saveSlot(n){
+  const inputId='slot-name-input-'+(n+1);
+  const existing=document.getElementById(inputId);
+  if(existing){existing.remove();return;}
+  const row=document.getElementById('slot-row-'+(n+1));
+  const inp=document.createElement('input');
+  inp.type='text';inp.placeholder='이름 입력 (선택)';inp.id=inputId;
+  inp.style.cssText='font-size:11px;padding:3px 8px;border:0.5px solid var(--blue-border);border-radius:6px;background:var(--card);color:var(--text);width:120px;outline:none;margin-left:4px';
+  inp.onkeydown=function(e){
+    if(e.key==='Enter'){doSave(n,inp.value);inp.remove();}
+    if(e.key==='Escape') inp.remove();
+  };
+  inp.onblur=function(){setTimeout(()=>{const el=document.getElementById(inputId);if(el){doSave(n,inp.value);el.remove();}},200);};
+  row.appendChild(inp);inp.focus();
 }
-
-// 리텐션 적분 계산 (평균 활성일수)
-function retIntegral(d1, d7, d30){
-  const seg1=(100+d1)/2*1;
-  const seg2=(d1+d7)/2*6;
-  const seg3=(d7+d30)/2*23;
-  return (seg1+seg2+seg3)/100;
+function doSave(n,name){
+  const data=getSlotData();
+  data.name=name.trim()||('슬롯'+(n+1));
+  localStorage.setItem(SLOT_KEYS[n],JSON.stringify(data));
+  renderSlotBtns();
 }
-// 기준 보정계수 (실측 기반)
-const BASE_CALIB = retIntegral(49.4, 16.1, 7.5); // 실측 리텐션 적분
-const BASE_LTV   = 0.9287;  // 실측 D30 LTV
-const BASE_ARPDAU_IAA = 0.3577; // 실측 ARPDAU (IAA only)
-
-function simSc(p){
-  let dau=START_DAU, rows=[], cum=0;
-  for(let i=0;i<9;i++){
-    const ua=getUA(i);
-    const cpi=p.cpi*(1+0.02*i);
-    const paid=ua/cpi;
-    const newU=paid*(1+p.organic/100);
-    // DAU 기여
-    const newDau=newU*(p.d1ret/100)*0.40;
-    dau=Math.max(dau*(p.mat/100)+newDau, START_DAU*0.15);
-
-    // LTV → ARPDAU 역산
-    const d7iaa  = p.d0iaa*(1+p.d07/100);
-    const d30iaa = d7iaa*(1+p.d730/100);
-    // 보정계수: 현재 리텐션 적분 / 실측 리텐션 적분 × 실측 보정값
-    const curIntegral = retIntegral(p.d1ret, p.d7ret, p.d30ret);
-    const calibFactor = (curIntegral / BASE_CALIB) * (BASE_LTV / BASE_ARPDAU_IAA);
-
-    // D30 IAP LTV = PUR × ARPPU
-    const d30iap = (p.pur/100)*p.arppu;
-    const d30ltv = d30iaa + d30iap;
-
-    // IAA ARPDAU: D30 IAA LTV / 보정계수
-    const iaaA = d30iaa / calibFactor;
-    // IAP ARPDAU: D30 IAP LTV / 보정계수 (IAA와 동일 기준)
-    const iapA = d30iap / calibFactor;
-    const totalArpdau = iaaA + iapA;
-
-    // eCPM 역산 (표시용)
-    const impliedEcpm = iaaA * 1000 / BASE_IMPS;
-    // eCPM 희석 적용 (볼륨 증가 시)
-    const dilFactor = ecpmEff(dau, p.dil) / BASE_ECPM;
-    const effectiveArpdau = iaaA * dilFactor + iapA;
-    const effectiveEcpm = effectiveArpdau * 1000 / BASE_IMPS;
-
-    const iaa=Math.round(dau*iaaA*dilFactor*DAYS[i]);
-    const iap=Math.round(dau*iapA*DAYS[i]);
-    const rev=iaa+iap;
-    cum+=rev;
-
-    rows.push({
-      mo:MOS[i],ph:PH[i],dau:Math.round(dau),iaa,iap,rev,ua:Math.round(ua),
-      net:Math.round(rev-ua),margin:rev>0?(rev-ua)/rev*100:0,
-      cum:Math.round(cum),
-      ecpm:+effectiveEcpm.toFixed(2),
-      arpdau:+effectiveArpdau.toFixed(4),
-      cpi:+cpi.toFixed(3),
-      d0ltv:+p.d0iaa.toFixed(3),
-      d7ltv:+d7iaa.toFixed(3),
-      d30ltv:+d30ltv.toFixed(2),
-      d30iaa:+d30iaa.toFixed(3),
-      d30iap:+d30iap.toFixed(3),
+function loadSlot(n){
+  const raw=localStorage.getItem(SLOT_KEYS[n]);
+  if(!raw)return;
+  const data=JSON.parse(raw);
+  SC.bull={...data.SC.bull};SC.base={...data.SC.base};SC.bear={...data.SC.bear};
+  if(data.PERIOD) Object.assign(PERIOD,data.PERIOD);
+  if(data.uas) Object.keys(data.uas).forEach(i=>{const el=document.getElementById('p'+i+'ua');if(el)el.value=data.uas[i];});
+  if(data.targetRev){const el=document.getElementById('targetRev');if(el)el.value=data.targetRev;}
+  updPhBtns();renderUASection();renderPeriodSummary();
+  ['bull','base','bear'].forEach(sc=>syncD7(sc));
+  render();
+}
+function deleteSlot(n){localStorage.removeItem(SLOT_KEYS[n]);renderSlotBtns();}
+function renderSlotBtns(){
+  SLOT_KEYS.forEach((k,i)=>{
+    const raw=localStorage.getItem(k);
+    const btn=document.getElementById('slot-btn-'+(i+1));
+    const del=document.getElementById('slot-del-'+(i+1));
+    if(!btn)return;
+    if(raw){
+      const d=JSON.parse(raw);
+      btn.textContent=(d.name||('슬롯'+(i+1)))+' · '+d.ts;
+      btn.style.color='var(--blue)';
+      if(del)del.style.display='inline';
+    } else {
+      btn.textContent='슬롯'+(i+1)+' (비어있음)';
+      btn.style.color='var(--text2)';
+      if(del)del.style.display='none';
+    }
+  });
+}
+function syncAllSliders(){
+  const map={
+    bull:[['bl-d1','d1ret',1,'%'],['bl-d7','d7ret',1,'%'],['bl-d30','d30ret',1,'%'],
+          ['bull-pur','pur',1,'%'],['bull-d0ap','d0arppu',2,'$'],['bull-ap07','arppu07',0,'%'],['bull-ap730','arppu730',0,'%'],
+          ['bull-cpi','cpi',2,'$'],['bull-ecpmBase','ecpmBase',1,'$'],['bull-ecpmRate','ecpmRate',1,'%/월'],['bull-org','organic',0,'%']],
+    base:[['bm-d1','d1ret',1,'%'],['bm-d7','d7ret',1,'%'],['bm-d30','d30ret',1,'%'],
+          ['base-pur','pur',1,'%'],['base-d0ap','d0arppu',2,'$'],['base-ap07','arppu07',0,'%'],['base-ap730','arppu730',0,'%'],
+          ['base-cpi','cpi',2,'$'],['base-ecpmBase','ecpmBase',1,'$'],['base-ecpmRate','ecpmRate',1,'%/월'],['base-org','organic',0,'%']],
+    bear:[['bw-d1','d1ret',1,'%'],['bw-d7','d7ret',1,'%'],['bw-d30','d30ret',1,'%'],
+          ['bear-pur','pur',1,'%'],['bear-d0ap','d0arppu',2,'$'],['bear-ap07','arppu07',0,'%'],['bear-ap730','arppu730',0,'%'],
+          ['bear-cpi','cpi',2,'$'],['bear-ecpmBase','ecpmBase',1,'$'],['bear-ecpmRate','ecpmRate',1,'%/월'],['bear-org','organic',0,'%']],
+  };
+  ['bull','base','bear'].forEach(sc=>{
+    map[sc].forEach(([lid,key,dec,pre])=>{
+      const v=SC[sc][key];
+      const el=document.getElementById(lid);
+      if(el) el.textContent=(pre==='$'?'$':'')+(dec>0?v.toFixed(dec):Math.round(v))+(pre!=='$'?pre:'');
     });
-  }
-  return rows;
-}
-
-function allSim(){return{bull:simSc(SC.bull),base:simSc(SC.base),bear:simSc(SC.bear)}}
-
-function fmt(n){const a=Math.abs(n),s=n<0?'-':'';return s+(a>=1e6?'$'+(a/1e6).toFixed(2)+'M':a>=1e3?'$'+(a/1e3).toFixed(0)+'K':'$'+Math.round(a))}
-function fmtN(n){return Math.round(+n).toLocaleString()}
-
-function updateSummaryCards(all){
-  const tv=parseFloat(document.getElementById('targetRev').value); const target=isNaN(tv)||tv<=0?10375000:tv;
-  const mgColors={bull:'var(--green)',base:'var(--blue)',bear:'var(--red)'};
-  ['bull','base','bear'].forEach(k=>{
-    const rows=all[k];
-    const ann=rows[8].cum, uaT=rows.reduce((s,r)=>s+r.ua,0), net=ann-uaT, mg=net/ann*100;
-    const pct=Math.round(ann/target*100);
-    document.getElementById(k+'-rev').textContent=fmt(ann);
-    document.getElementById(k+'-pct').textContent=pct+'%';
-    document.getElementById(k+'-gauge').style.width=Math.min(pct,100)+'%';
-    document.getElementById(k+'-meta').innerHTML=
-      `순이익 ${fmt(net)} · 마진 ${mg.toFixed(0)}%<br>`+
-      `최종 DAU ${fmtN(rows[8].dau)} · D30 LTV $${rows[8].d30ltv}`;
-    // 상단 마진율 표시
-    try{
-      const el=document.getElementById('ua-margin-'+k);
-      if(el){el.textContent=mg.toFixed(0)+'%';el.style.color=mgColors[k];}
-    }catch(e){}
+    updArppu(sc);
+    syncD7(sc);
   });
 }
 
-function buildChart(id, cfg){
-  if(charts[id]) charts[id].destroy();
-  charts[id]=new Chart(document.getElementById(id), cfg);
-}
-
-function buildCompare(all){
-  const plan=PLAN_MONTHLY;
-  buildChart('compareChart',{type:'bar',data:{labels:MOS,datasets:[
-    {label:'공격안',data:all.bull.map(r=>r.rev),backgroundColor:'rgba(15,110,86,0.65)'},
-    {label:'현실안',data:all.base.map(r=>r.rev),backgroundColor:'rgba(24,95,165,0.55)'},
-    {label:'보수안',data:all.bear.map(r=>r.rev),backgroundColor:'rgba(163,45,45,0.45)'},
-    {label:'계획서',data:plan,type:'line',borderColor:'rgba(100,100,100,0.5)',borderDash:[5,3],borderWidth:1.5,pointRadius:0,fill:false},
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
-    x:{ticks:{font:{size:11},autoSkip:false,maxRotation:0},grid:{display:false}},
-    y:{ticks:{font:{size:11},callback:v=>fmt(v)},grid:{color:'rgba(0,0,0,0.05)'}}
-  }}});
-}
-
-function buildCum(all){
-  const planCum=PLAN_MONTHLY.reduce((a,v,i)=>{a.push((a[i-1]||0)+v);return a},[]);
-  buildChart('cumChart',{type:'line',data:{labels:MOS,datasets:[
-    {data:all.bull.map(r=>r.cum),borderColor:'#0F6E56',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
-    {data:all.base.map(r=>r.cum),borderColor:'#185FA5',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
-    {data:all.bear.map(r=>r.cum),borderColor:'#A32D2D',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
-    {data:planCum,borderColor:'rgba(100,100,100,0.45)',borderDash:[5,3],borderWidth:1.5,pointRadius:0,fill:false},
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
-    x:{ticks:{font:{size:10},autoSkip:false,maxRotation:0},grid:{display:false}},
-    y:{ticks:{font:{size:10},callback:v=>fmt(v)},grid:{color:'rgba(0,0,0,0.05)'}}
-  }}});
-}
-
-function buildArpdau(all){
-  buildChart('arpdauChart',{type:'line',data:{labels:MOS,datasets:[
-    {data:all.bull.map(r=>r.arpdau),borderColor:'#0F6E56',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
-    {data:all.base.map(r=>r.arpdau),borderColor:'#185FA5',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
-    {data:all.bear.map(r=>r.arpdau),borderColor:'#A32D2D',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
-    {data:MOS.map(()=>0.357),borderColor:'rgba(100,100,100,0.3)',borderDash:[3,3],borderWidth:1.5,pointRadius:0,fill:false},
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
-    x:{ticks:{font:{size:10},autoSkip:false,maxRotation:0},grid:{display:false}},
-    y:{ticks:{font:{size:10},callback:v=>'$'+v.toFixed(3)},grid:{color:'rgba(0,0,0,0.05)'}}
-  }}});
-}
-
-function buildDau(all){
-  buildChart('dauChart',{type:'line',data:{labels:MOS,datasets:[
-    {data:all.bull.map(r=>r.dau),borderColor:'#0F6E56',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
-    {data:all.base.map(r=>r.dau),borderColor:'#185FA5',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
-    {data:all.bear.map(r=>r.dau),borderColor:'#A32D2D',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
-    {data:[500,15000,30000,70000,130000,200000,250000,300000,370000],borderColor:'rgba(100,100,100,0.45)',borderDash:[5,3],borderWidth:1.5,pointRadius:0,fill:false},
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
-    x:{ticks:{font:{size:10},autoSkip:false,maxRotation:0},grid:{display:false}},
-    y:{ticks:{font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{color:'rgba(0,0,0,0.05)'}}
-  }}});
-}
-
-function buildLTV(all){
-  const scKeys=['bull','base','bear'];
-  const scNames=['공격안','현실안','보수안'];
-  const scColors=['var(--green)','var(--blue)','var(--red)'];
-  let html='';
-  scKeys.forEach((k,idx)=>{
-    const p=SC[k], r=all[k][8];
-    const d7=p.d0iaa*(1+p.d07/100);
-    const d30iaa=d7*(1+p.d730/100);
-    const d30iap=p.pur/100*p.arppu;
-    const d30tot=d30iaa+d30iap;
-    const incr=d30tot-0.93;
-    const iapPct=d30tot>0?(d30iap/d30tot*100):0;
-    html+=`<div class="ltv-card" style="border-top:3px solid ${scColors[idx]}">
-      <div style="font-size:12px;font-weight:600;color:${scColors[idx]};margin-bottom:8px">${scNames[idx]}</div>
-      <div class="ltv-row"><span class="ltv-key">D0 IAA LTV</span><span class="ltv-val">$${p.d0iaa.toFixed(3)}</span></div>
-      <div class="ltv-row"><span class="ltv-key">D7 IAA LTV</span><span class="ltv-val">$${d7.toFixed(3)} <span style="font-size:10px;color:var(--text2)">(+${p.d07}%)</span></span></div>
-      <div class="ltv-row"><span class="ltv-key">D30 IAA LTV</span><span class="ltv-val">$${d30iaa.toFixed(3)} <span style="font-size:10px;color:var(--text2)">(+${p.d730}%)</span></span></div>
-      <div class="ltv-row"><span class="ltv-key">D30 IAP LTV</span><span class="ltv-val" style="color:var(--teal)">+$${d30iap.toFixed(3)}</span></div>
-      <hr style="border:none;border-top:0.5px solid var(--border);margin:6px 0">
-      <div class="ltv-row ltv-total">
-        <span>D30 합계</span>
-        <span style="color:${scColors[idx]}">$${d30tot.toFixed(2)}</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
-        <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
-          <div style="height:100%;border-radius:3px;display:flex">
-            <div style="width:${(100-iapPct).toFixed(1)}%;background:#3266ad"></div>
-            <div style="width:${iapPct.toFixed(1)}%;background:#1D9E75"></div>
-          </div>
-        </div>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text2);margin-top:3px">
-        <span><span style="display:inline-block;width:8px;height:8px;background:#3266ad;border-radius:2px;margin-right:3px"></span>IAA ${(100-iapPct).toFixed(0)}% ($${d30iaa.toFixed(2)})</span>
-        <span><span style="display:inline-block;width:8px;height:8px;background:#1D9E75;border-radius:2px;margin-right:3px"></span>IAP ${iapPct.toFixed(0)}% ($${d30iap.toFixed(2)})</span>
-      </div>
-      <div class="ltv-incr" style="color:${incr>=0?'var(--green)':'var(--red)'};margin-top:6px">현재($0.93) 대비 ${incr>=0?'+':''}$${incr.toFixed(2)}</div>
-      <div class="ltv-incr" style="color:var(--text2);margin-top:2px">D1 ${p.d1ret}% · D7 ${p.d7ret.toFixed(1)}% · D30 ${p.d30ret}%</div>
-    </div>`;
-  });
-  document.getElementById('ltv-cards').innerHTML=html;
-
-  const labels=['D0','D7','D30 IAA','D30 합계'];
-  const getData=k=>{const p=SC[k];const d7=p.d0iaa*(1+p.d07/100);const d30iaa=d7*(1+p.d730/100);return[p.d0iaa,d7,d30iaa,d30iaa+p.pur/100*p.arppu*30]};
-  buildChart('ltvChart',{type:'bar',data:{labels,datasets:[
-    {label:'공격안',data:getData('bull'),backgroundColor:'rgba(15,110,86,0.7)'},
-    {label:'현실안',data:getData('base'),backgroundColor:'rgba(24,95,165,0.6)'},
-    {label:'보수안',data:getData('bear'),backgroundColor:'rgba(163,45,45,0.5)'},
-    {label:'현재',data:[0.231,0.73,0.93,0.93],type:'line',borderColor:'rgba(100,100,100,0.55)',borderDash:[4,3],borderWidth:2,pointRadius:4,fill:false},
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
-    x:{ticks:{font:{size:11}},grid:{display:false}},
-    y:{ticks:{font:{size:11},callback:v=>'$'+v.toFixed(1)},grid:{color:'rgba(0,0,0,0.05)'}}
-  }}});
-
-  buildChart('ecpmChart',{type:'line',data:{labels:MOS,datasets:[
-    {data:all.bull.map(r=>r.ecpm),borderColor:'#0F6E56',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
-    {data:all.base.map(r=>r.ecpm),borderColor:'#185FA5',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
-    {data:all.bear.map(r=>r.ecpm),borderColor:'#A32D2D',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
-    {data:MOS.map(()=>34.1),borderColor:'rgba(100,100,100,0.3)',borderDash:[3,3],borderWidth:1.5,pointRadius:0,fill:false},
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
-    x:{ticks:{font:{size:10},autoSkip:false,maxRotation:0},grid:{display:false}},
-    y:{ticks:{font:{size:10},callback:v=>'$'+v.toFixed(0)},grid:{color:'rgba(0,0,0,0.05)'},min:0}
-  }}});
-}
-
-function buildDetail(all){
-  const t=document.getElementById('detailTbl');
-  const phBadge=ph=>`<span class="ph-badge ph${ph+1}">${['P1','P2','P3'][ph]}</span>`;
-  const mc=m=>m>=60?'bg':m>=20?'bb':'br';
-
-  if(detailTab==='all'){
-    t.innerHTML=`<tr>
-      <th style="text-align:left">월</th>
-      <th colspan="3">DAU</th><th colspan="3">월매출</th>
-      <th colspan="3">ARPDAU</th><th colspan="3">마진</th><th colspan="3">D30 LTV</th>
-    </tr>
-    <tr>
-      <th style="text-align:left"></th>
-      <th style="color:#0F6E56">공격</th><th style="color:#185FA5">현실</th><th style="color:#A32D2D">보수</th>
-      <th style="color:#0F6E56">공격</th><th style="color:#185FA5">현실</th><th style="color:#A32D2D">보수</th>
-      <th style="color:#0F6E56">공격</th><th style="color:#185FA5">현실</th><th style="color:#A32D2D">보수</th>
-      <th style="color:#0F6E56">공격</th><th style="color:#185FA5">현실</th><th style="color:#A32D2D">보수</th>
-      <th style="color:#0F6E56">공격</th><th style="color:#185FA5">현실</th><th style="color:#A32D2D">보수</th>
-    </tr>`;
-    all.bull.forEach((rb,i)=>{
-      const rm=all.base[i], rw=all.bear[i];
-      const cls=i===8?' class="total-row"':'';
-      t.innerHTML+=`<tr${cls}>
-        <td>${phBadge(rb.ph)}${rb.mo}</td>
-        <td>${fmtN(rb.dau)}</td><td>${fmtN(rm.dau)}</td><td>${fmtN(rw.dau)}</td>
-        <td>${fmt(rb.rev)}</td><td>${fmt(rm.rev)}</td><td>${fmt(rw.rev)}</td>
-        <td>$${rb.arpdau}</td><td>$${rm.arpdau}</td><td>$${rw.arpdau}</td>
-        <td><span class="badge ${mc(rb.margin)}">${rb.margin.toFixed(0)}%</span></td>
-        <td><span class="badge ${mc(rm.margin)}">${rm.margin.toFixed(0)}%</span></td>
-        <td><span class="badge ${mc(rw.margin)}">${rw.margin.toFixed(0)}%</span></td>
-        <td>$${rb.d30ltv}</td><td>$${rm.d30ltv}</td><td>$${rw.d30ltv}</td>
-      </tr>`;
-    });
-    // 합계
-    ['bull','base','bear'].forEach(k=>{});
-    const sumRow=(k)=>{const r=all[k];const ann=r[8].cum,ua=r.reduce((s,v)=>s+v.ua,0);return{ann,net:ann-ua,mg:(ann-ua)/ann*100}};
-    const sb=sumRow('bull'),sm=sumRow('base'),sw=sumRow('bear');
-    t.innerHTML+=`<tr class="total-row">
-      <td><b>합계</b></td>
-      <td colspan="3"></td>
-      <td>${fmt(sb.ann)}</td><td>${fmt(sm.ann)}</td><td>${fmt(sw.ann)}</td>
-      <td colspan="3"></td>
-      <td><span class="badge ${mc(sb.mg)}">${sb.mg.toFixed(0)}%</span></td>
-      <td><span class="badge ${mc(sm.mg)}">${sm.mg.toFixed(0)}%</span></td>
-      <td><span class="badge ${mc(sw.mg)}">${sw.mg.toFixed(0)}%</span></td>
-      <td colspan="3"></td>
-    </tr>`;
-  } else {
-    const rows=all[detailTab];
-    const scName={bull:'공격안',base:'현실안',bear:'보수안'}[detailTab];
-    t.innerHTML=`<tr><th style="text-align:left">월 (${scName})</th><th>DAU</th><th>IAA</th><th>IAP</th><th>월매출</th><th>UA예산</th><th>순이익</th><th>마진</th><th>ARPDAU</th><th>eCPM</th><th>CPI</th><th>D30 LTV</th></tr>`;
-    let totRev=0,totUA=0,totNet=0;
-    rows.forEach((r,i)=>{
-      const cls=i===8?' class="total-row"':'';
-      totRev+=r.rev; totUA+=r.ua; totNet+=r.net;
-      t.innerHTML+=`<tr${cls}>
-        <td>${phBadge(r.ph)}${r.mo}</td>
-        <td>${fmtN(r.dau)}</td><td>${fmt(r.iaa)}</td><td>${fmt(r.iap)}</td>
-        <td>${fmt(r.rev)}</td><td>${fmt(r.ua)}</td><td>${fmt(r.net)}</td>
-        <td><span class="badge ${mc(r.margin)}">${r.margin.toFixed(0)}%</span></td>
-        <td>$${r.arpdau}</td><td>$${r.ecpm}</td><td>$${r.cpi}</td><td>$${r.d30ltv}</td>
-      </tr>`;
-    });
-    t.innerHTML+=`<tr class="total-row"><td><b>연간 합계</b></td><td></td><td></td><td></td><td>${fmt(totRev)}</td><td>${fmt(totUA)}</td><td>${fmt(totNet)}</td><td><span class="badge ${mc(totNet/totRev*100)}">${(totNet/totRev*100).toFixed(0)}%</span></td><td colspan="4"></td></tr>`;
-  }
-}
-
-function showDetailTab(t){
-  detailTab=t;
-  document.querySelectorAll('.detail-tab').forEach((el,i)=>el.classList.toggle('on',['all','bull','base','bear'][i]===t));
-  const all=allSim();
-  buildDetail(all);
-}
-
-function updUALabel(){
-  const p1v=parseFloat(document.getElementById('p1ua').value)||30000;
-  const p2v=parseFloat(document.getElementById('p2ua').value)||90000;
-  const p3v=parseFloat(document.getElementById('p3ua').value)||240000;
-  const fmt3=n=>'$'+Math.round(n).toLocaleString();
-  document.getElementById('p1ua-monthly').textContent=fmt3(p1v)+'/월';
-  document.getElementById('p2ua-monthly').textContent=fmt3(p2v/2)+'/월';
-  document.getElementById('p3ua-monthly').textContent=fmt3(p3v/6)+'/월';
-  document.getElementById('ua-total-label').textContent=fmt3(p1v+p2v+p3v);
-  render();
-}
-function render(){
-  // UA 월환산 레이블 업데이트
-  try{
-    const p1v=parseFloat(document.getElementById('p1ua').value)||30000;
-    const p2v=parseFloat(document.getElementById('p2ua').value)||90000;
-    const p3v=parseFloat(document.getElementById('p3ua').value)||240000;
-    const fm=n=>'$'+Math.round(n).toLocaleString();
-    document.getElementById('p1ua-monthly').textContent=fm(p1v)+'/월';
-    document.getElementById('p2ua-monthly').textContent=fm(p2v/2)+'/월';
-    document.getElementById('p3ua-monthly').textContent=fm(p3v/6)+'/월';
-    const uaTotal=p1v+p2v+p3v;
-    document.getElementById('ua-total-label').textContent=fm(uaTotal);
-  }catch(e){}
-  const all=allSim();
-  updateSummaryCards(all);
-  buildCompare(all);
-  buildCum(all);
-  buildArpdau(all);
-  buildDau(all);
-  buildLTV(all);
-  buildDetail(all);
-}
-
-function sp(sc,key,val,lid,pre,dec,suf){
-  SC[sc][key]=val;
-  document.getElementById(lid).textContent=(pre||'')+(dec>0?val.toFixed(dec):Math.round(val))+(suf||'');
-  render();
-}
-function spDil(sc,val,lid){SC[sc].dil=val;document.getElementById(lid).textContent=DIL_LABELS[val];render();}
-
-// 초기 연동 상태 적용
-['bull','base','bear'].forEach(sc=>{syncD7(sc);});
+// ============================================================
+// 초기화
+// ============================================================
+['bull','base','bear'].forEach(sc=>syncD7(sc));
+renderUASection();
+renderPeriodSummary();
+updPhBtns();
 render();
+renderSlotBtns();
 </script>
+
 </body>
 </html>
