@@ -57,7 +57,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 .ua-phase{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:10px}
 .ua-phase-label{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
 .ua-phase input[type=number]{width:100%;border:0.5px solid var(--border2);border-radius:6px;padding:5px 8px;font-size:13px;font-weight:600;background:var(--card);color:var(--text);outline:none} .ua-phase input[type=number]:focus{border-color:var(--blue)}
-.ua-phase input[type=number]:focus{border-color:var(--blue)}
 
 /* TARGET */
 .target-row{display:flex;align-items:center;gap:12px;margin-top:12px;padding:10px 12px;background:var(--bg);border-radius:var(--radius)}
@@ -717,7 +716,9 @@ function allSim(){
 // ============================================================
 function fmt(n){
   const a=Math.abs(n), s=n<0?'-':'';
-  return s+(a>=1e6?'$'+(a/1e6).toFixed(2)+'M':a>=1e3?'$'+(a/1e3).toFixed(0)+'K':'$'+Math.round(a));
+  if(a>=1e6) return s+'$'+(a/1e6).toFixed(2)+'M';
+  if(a>=1e3) return s+'$'+(a/1e3).toFixed(1)+'K';
+  return s+'$'+Math.round(a);
 }
 function fmtN(n){return Math.round(+n).toLocaleString();}
 
@@ -815,9 +816,9 @@ function buildLTV(all){
   document.getElementById('ltv-cards').innerHTML=h;
   // eCPM 차트
   buildChart('ecpmChart',{type:'line',data:{labels:getMOS(),datasets:[
-    {data:simSc(SC.bull).map(r=>r.ecpm),borderColor:'#0F6E56',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
-    {data:simSc(SC.base).map(r=>r.ecpm),borderColor:'#185FA5',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
-    {data:simSc(SC.bear).map(r=>r.ecpm),borderColor:'#A32D2D',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:all.bull.map(r=>r.ecpm),borderColor:'#0F6E56',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:all.base.map(r=>r.ecpm),borderColor:'#185FA5',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
+    {data:all.bear.map(r=>r.ecpm),borderColor:'#A32D2D',tension:0.3,fill:false,borderWidth:2,pointRadius:2},
     {data:getMOS().map(()=>34.1),borderColor:'rgba(100,100,100,0.3)',borderDash:[3,3],borderWidth:1.5,pointRadius:0,fill:false},
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
     x:{ticks:{font:{size:10},autoSkip:false,maxRotation:0},grid:{display:false}},
@@ -907,10 +908,11 @@ function buildDetail(all){
       <th style="color:#0F6E56">공격</th><th style="color:#185FA5">현실</th><th style="color:#A32D2D">보수</th>
       <th style="color:#0F6E56">공격</th><th style="color:#185FA5">현실</th><th style="color:#A32D2D">보수</th>
     </tr>`;
+    const rowsHtml = [];
     all.bull.forEach((rb,i)=>{
       const rm=all.base[i], rw=all.bear[i];
       const cls=i===n-1?' class="total-row"':'';
-      t.innerHTML+=`<tr${cls}>
+      rowsHtml.push(`<tr${cls}>
         <td>${phBadge(rb.ph)}${rb.mo}</td>
         <td>${fmtN(rb.dau)}</td><td>${fmtN(rm.dau)}</td><td>${fmtN(rw.dau)}</td>
         <td>${fmt(rb.rev)}</td><td>${fmt(rm.rev)}</td><td>${fmt(rw.rev)}</td>
@@ -919,11 +921,11 @@ function buildDetail(all){
         <td><span class="badge ${mc(rm.margin)}">${rm.margin.toFixed(0)}%</span></td>
         <td><span class="badge ${mc(rw.margin)}">${rw.margin.toFixed(0)}%</span></td>
         <td>$${rb.d30ltv}</td><td>$${rm.d30ltv}</td><td>$${rw.d30ltv}</td>
-      </tr>`;
+      </tr>`);
     });
     const sv=(k)=>{const r=all[k],ann=r[r.length-1].cum,ua=r.reduce((s,v)=>s+v.ua,0);return{ann,net:ann-ua,mg:(ann-ua)/ann*100};};
     const sb=sv('bull'),sm=sv('base'),sw=sv('bear');
-    t.innerHTML+=`<tr class="total-row">
+    rowsHtml.push(`<tr class="total-row">
       <td><b>합계</b></td><td colspan="3"></td>
       <td>${fmt(sb.ann)}</td><td>${fmt(sm.ann)}</td><td>${fmt(sw.ann)}</td>
       <td colspan="3"></td>
@@ -931,25 +933,28 @@ function buildDetail(all){
       <td><span class="badge ${mc(sm.mg)}">${sm.mg.toFixed(0)}%</span></td>
       <td><span class="badge ${mc(sw.mg)}">${sw.mg.toFixed(0)}%</span></td>
       <td colspan="3"></td>
-    </tr>`;
+    </tr>`);
+    t.innerHTML += rowsHtml.join('');
   } else {
     const rows=all[detailTab];
     const n=rows.length;
     const scName={bull:'공격안',base:'현실안',bear:'보수안'}[detailTab];
     t.innerHTML=`<tr><th style="text-align:left">월 (${scName})</th><th>DAU</th><th>IAA</th><th>IAP</th><th>월매출</th><th>UA예산</th><th>순이익</th><th>마진</th><th>ARPDAU</th><th>eCPM</th><th>CPI</th><th>D30 LTV</th></tr>`;
     let totRev=0,totUA=0,totNet=0;
+    const rowsHtml2 = [];
     rows.forEach((r,i)=>{
       const cls=i===n-1?' class="total-row"':'';
       totRev+=r.rev; totUA+=r.ua; totNet+=r.net;
-      t.innerHTML+=`<tr${cls}>
+      rowsHtml2.push(`<tr${cls}>
         <td>${phBadge(r.ph)}${r.mo}</td>
         <td>${fmtN(r.dau)}</td><td>${fmt(r.iaa)}</td><td>${fmt(r.iap)}</td>
         <td>${fmt(r.rev)}</td><td>${fmt(r.ua)}</td><td>${fmt(r.net)}</td>
         <td><span class="badge ${mc(r.margin)}">${r.margin.toFixed(0)}%</span></td>
         <td>$${r.arpdau}</td><td>$${r.ecpm}</td><td>$${r.cpi}</td><td>$${r.d30ltv}</td>
-      </tr>`;
+      </tr>`);
     });
-    t.innerHTML+=`<tr class="total-row"><td><b>합계</b></td><td></td><td></td><td></td><td>${fmt(totRev)}</td><td>${fmt(totUA)}</td><td>${fmt(totNet)}</td><td><span class="badge ${mc(totNet/totRev*100)}">${(totNet/totRev*100).toFixed(0)}%</span></td><td colspan="4"></td></tr>`;
+    rowsHtml2.push(`<tr class="total-row"><td><b>합계</b></td><td></td><td></td><td></td><td>${fmt(totRev)}</td><td>${fmt(totUA)}</td><td>${fmt(totNet)}</td><td><span class="badge ${mc(totNet/totRev*100)}">${(totNet/totRev*100).toFixed(0)}%</span></td><td colspan="4"></td></tr>`);
+    t.innerHTML += rowsHtml2.join('');
   }
 }
 function showDetailTab(tab){
@@ -1179,8 +1184,8 @@ function getSlotData(){
   const uas={};
   for(let i=1;i<=4;i++){const el=document.getElementById('p'+i+'ua');if(el)uas[i]=el.value;}
   return {
-    SC:JSON.parse(JSON.stringify(SC)),
-    PERIOD:JSON.parse(JSON.stringify(PERIOD)),
+    SC:structuredClone(SC),
+    PERIOD:structuredClone(PERIOD),
     uas,
     targetRev:document.getElementById('targetRev').value,
     ts:new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})
@@ -1226,6 +1231,7 @@ function loadSlot(n){
   if(data.targetRev){const el=document.getElementById('targetRev');if(el)el.value=data.targetRev;}
   updPhBtns();renderUASection();renderPeriodSummary();
   ['bull','base','bear'].forEach(sc=>{syncD7(sc);updIaaArpdau(sc);});
+  syncAllSliders();
   render();
 }
 function deleteSlot(n){localStorage.removeItem(SLOT_KEYS[n]);renderSlotBtns();}
