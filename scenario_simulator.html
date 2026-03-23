@@ -256,119 +256,179 @@ hr{border:none;border-top:0.5px solid var(--border);margin:14px 0}
 
       <div class="sc-params-grid">
         <!-- BULL -->
-        <div class="sc-col bull">
-          <div class="sc-col-title">▲ 공격안</div>
-          <div class="param-group">
-            <div class="param-group-title">리텐션</div>
-            <div class="ctrl"><div class="ctrl-lbl">D1 리텐션 <b id="bl-d1">55%</b></div><input type="range" min="20" max="80" step="1" value="55" oninput="sp('bull','d1ret',+this.value,'bl-d1','',1,'%');syncD7('bull')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">D7 리텐션 <span class="linked" id="bull-d7-link" onclick="toggleLink('bull')">D1 연동</span><b id="bl-d7">27.5%</b></div><input type="range" min="5" max="50" step="0.5" value="27.5" id="bull-d7-slider" oninput="sp('bull','d7ret',+this.value,'bl-d7','',1,'%')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">D30 리텐션 <span class="linked" id="bull-d30-link" onclick="toggleD30Link('bull')">D1 연동</span><b id="bl-d30">11%</b></div><input type="range" min="2" max="25" step="0.5" value="11" id="bull-d30-slider" oninput="SC.bull.d30linked=false;document.getElementById('bull-d30-link').textContent='수동';document.getElementById('bull-d30-link').style.color='var(--text2)';sp('bull','d30ret',+this.value,'bl-d30','',1,'%')"></div>
-          </div>
-          <div class="param-group">
-            <div class="param-group-title">LTV — IAP</div>
-            <div class="ctrl"><div class="ctrl-lbl">PUR <b id="bull-pur">5.5%</b></div><input type="range" min="0" max="50" step="0.5" value="5.5" oninput="sp('bull','pur',+this.value,'bull-pur','',1,'%');updArppu('bull')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">D0 ARPPU <b id="bull-d0ap">$5</b></div><input type="range" min="0.5" max="100" step="0.5" value="5" oninput="sp('bull','d0arppu',+this.value,'bull-d0ap','$',2);updArppu('bull')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="bull-ap07">80%</b></div><input type="range" min="0" max="500" step="10" value="80" oninput="sp('bull','arppu07',+this.value,'bull-ap07','',0,'%');updArppu('bull')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="bull-ap730">50%</b></div><input type="range" min="0" max="500" step="10" value="50" oninput="sp('bull','arppu730',+this.value,'bull-ap730','',0,'%');updArppu('bull')"></div>
-            <div style="display:flex;justify-content:space-between;padding:5px 8px;background:var(--green-bg);border-radius:6px;font-size:11px;margin-top:2px">
-              <span style="color:var(--green)">D30 ARPPU</span>
-              <span style="font-weight:700;color:var(--green)" id="bull-d30ap">$13.5</span>
-            </div>
-          </div>
-          <div class="param-group">
-            <div class="param-group-title">UA / 광고</div>
-            <div class="ctrl"><div class="ctrl-lbl">초기 CPI <b id="bull-cpi">$0.63</b></div><input type="range" min="0.2" max="3.0" step="0.05" value="0.63" oninput="sp('bull','cpi',+this.value,'bull-cpi','$',2)"></div>
-            <div class="ctrl">
-              <div class="ctrl-lbl"><span style="display:flex;align-items:center;gap:1px">기준 eCPM<span class="info-btn" onclick="toggleInfo('bull-ecpm-info')">ℹ</span></span><b id="bull-ecpmBase">$34.1</b>
-              </div>
-              <input type="range" min="5" max="80" step="0.5" value="34.1" oninput="sp('bull','ecpmBase',+this.value,'bull-ecpmBase','$',1)">
-              <div class="info-box" id="bull-ecpm-info">현재 실측 eCPM $34.1 기준. imps/DAU 10 고정 시 ARPDAU = eCPM × 10 / 1000.</div>
-            </div>
-            <div class="ctrl">
-              <div class="ctrl-lbl"><span style="display:flex;align-items:center;gap:1px">월별 eCPM 변화율<span class="info-btn" onclick="toggleInfo('bull-ecpmr-info')">ℹ</span></span><b id="bull-ecpmRate">2%/월</b>
-              </div>
-              <input type="range" min="-10" max="10" step="0.5" value="2" oninput="sp('bull','ecpmRate',+this.value,'bull-ecpmRate','',1,'%/월')">
-              <div class="info-box" id="bull-ecpmr-info">UA 스케일업 초기 신규 유저 광고 참여율 저하로 하락 가능. 네트워크 최적화 후 반등 시 양수 설정. 최저 기준 eCPM의 30%까지 하락.</div>
-            </div>
-            <div class="ctrl"><div class="ctrl-lbl">오가닉 비율 <b id="bull-org">25%</b></div><input type="range" min="0" max="60" step="5" value="25" oninput="sp('bull','organic',+this.value,'bull-org','',0,'%')"></div>
-          </div>
-        </div>
+<div class="sc-col bull">
+  <div class="sc-col-title">▲ 공격안</div>
+  <div class="param-group">
+    <div class="param-group-title">리텐션</div>
+    <div class="ctrl"><div class="ctrl-lbl">D1 리텐션 <b id="bl-d1">55%</b></div><input type="range" min="20" max="80" step="1" value="55" oninput="sp('bull','d1ret',+this.value,'bl-d1','',1,'%');syncD7('bull')"></div>
+    <div class="ctrl"><div class="ctrl-lbl">D7 리텐션 <span class="linked" id="bull-d7-link" onclick="toggleLink('bull')">D1 연동</span><b id="bl-d7">27.5%</b></div><input type="range" min="5" max="50" step="0.5" value="27.5" id="bull-d7-slider" oninput="sp('bull','d7ret',+this.value,'bl-d7','',1,'%')"></div>
+    <div class="ctrl"><div class="ctrl-lbl">D30 리텐션 <span class="linked" id="bull-d30-link" onclick="toggleD30Link('bull')">D1 연동</span><b id="bl-d30">11%</b></div><input type="range" min="2" max="25" step="0.5" value="11" id="bull-d30-slider" oninput="SC.bull.d30linked=false;document.getElementById('bull-d30-link').textContent='수동';document.getElementById('bull-d30-link').style.color='var(--text2)';sp('bull','d30ret',+this.value,'bl-d30','',1,'%')"></div>
+  </div>
+  <div class="param-group">
+    <div class="param-group-title">LTV — IAP</div>
+    <div class="ctrl"><div class="ctrl-lbl">PUR <b id="bull-pur">5.5%</b></div><input type="range" min="0" max="50" step="0.5" value="5.5" oninput="sp('bull','pur',+this.value,'bull-pur','',1,'%');updArppu('bull')"></div>
+    <div class="ctrl"><div class="ctrl-lbl">D0 ARPPU <b id="bull-d0ap">$5</b></div><input type="range" min="0.5" max="100" step="0.5" value="5" oninput="sp('bull','d0arppu',+this.value,'bull-d0ap','$',2);updArppu('bull')"></div>
+    <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="bull-ap07">80%</b></div><input type="range" min="0" max="500" step="10" value="80" oninput="sp('bull','arppu07',+this.value,'bull-ap07','',0,'%');updArppu('bull')"></div>
+    <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="bull-ap730">50%</b></div><input type="range" min="0" max="500" step="10" value="50" oninput="sp('bull','arppu730',+this.value,'bull-ap730','',0,'%');updArppu('bull')"></div>
+    <div style="display:flex;justify-content:space-between;padding:5px 8px;background:var(--green-bg);border-radius:6px;font-size:11px;margin-top:2px"><span style="color:var(--green)">D30 ARPPU</span><span style="font-weight:700;color:var(--green)" id="bull-d30ap">$13.5</span></div>
+  </div>
+  <div class="param-group">
+    <div class="param-group-title">UA</div>
+    <div class="ctrl"><div class="ctrl-lbl">초기 CPI <b id="bull-cpi">$0.63</b></div><input type="range" min="0.2" max="3.0" step="0.05" value="0.63" oninput="sp('bull','cpi',+this.value,'bull-cpi','$',2)"></div>
+    <div class="ctrl"><div class="ctrl-lbl">오가닉 비율 <b id="bull-org">25%</b></div><input type="range" min="0" max="60" step="5" value="25" oninput="sp('bull','organic',+this.value,'bull-org','',0,'%')"></div>
+  </div>
+  <div class="param-group">
+    <div class="param-group-title" style="display:flex;align-items:center;gap:4px">LTV — IAA
+      <span style="display:inline-flex;gap:3px;margin-left:4px">
+        <span id="bull-rv-toggle" onclick="toggleAdType('bull','rv')" style="font-size:10px;padding:1px 7px;border:0.5px solid var(--border2);border-radius:4px;cursor:pointer;background:var(--blue-bg);color:var(--blue);border-color:var(--blue-border)">RV</span>
+        <span id="bull-is-toggle" onclick="toggleAdType('bull','is')" style="font-size:10px;padding:1px 7px;border:0.5px solid var(--border2);border-radius:4px;cursor:pointer;background:var(--blue-bg);color:var(--blue);border-color:var(--blue-border)">IS</span>
+        <span id="bull-bn-toggle" onclick="toggleAdType('bull','bn')" style="font-size:10px;padding:1px 7px;border:0.5px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2)">BN</span>
+      </span>
+    </div>
+<div id="bull-rv-params" style="display:block;background:var(--bg);border-radius:6px;padding:8px;margin-bottom:6px;border:0.5px solid var(--border)">
+  <div style="font-size:10px;font-weight:600;color:var(--text2);margin-bottom:6px">RV / Rewarded Video</div>
+  <div class="ctrl"><div class="ctrl-lbl">eCPM <b id="bull-rv-ecpm">$44</b></div><input type="range" min="0.5" max="100" step="0.5" value="44" oninput="spIaa('bull','rv','ecpm',+this.value,'bull-rv-ecpm','$',1)"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D0 imps/DAU <b id="bull-rv-d0imps">5.5</b></div><input type="range" min="0" max="30" step="0.5" value="5.5" oninput="spIaa('bull','rv','d0imps',+this.value,'bull-rv-d0imps','',1)"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="bull-rv-imps07">45%</b></div><input type="range" min="0" max="300" step="5" value="45" oninput="spIaa('bull','rv','imps07',+this.value,'bull-rv-imps07','',0,'%')"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="bull-rv-imps730">22%</b></div><input type="range" min="0" max="200" step="5" value="22" oninput="spIaa('bull','rv','imps730',+this.value,'bull-rv-imps730','',0,'%')"></div>
+  <div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--blue-bg);border-radius:5px;font-size:10px;margin-top:2px"><span style="color:var(--blue)">D30 imps/DAU</span><span style="font-weight:700;color:var(--blue)" id="bull-rv-d30imps">9.7</span></div>
+</div>
+<div id="bull-is-params" style="display:block;background:var(--bg);border-radius:6px;padding:8px;margin-bottom:6px;border:0.5px solid var(--border)">
+  <div style="font-size:10px;font-weight:600;color:var(--text2);margin-bottom:6px">IS / Interstitial</div>
+  <div class="ctrl"><div class="ctrl-lbl">eCPM <b id="bull-is-ecpm">$20</b></div><input type="range" min="0.5" max="100" step="0.5" value="20" oninput="spIaa('bull','is','ecpm',+this.value,'bull-is-ecpm','$',1)"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D0 imps/DAU <b id="bull-is-d0imps">1.8</b></div><input type="range" min="0" max="30" step="0.5" value="1.8" oninput="spIaa('bull','is','d0imps',+this.value,'bull-is-d0imps','',1)"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="bull-is-imps07">38%</b></div><input type="range" min="0" max="300" step="5" value="38" oninput="spIaa('bull','is','imps07',+this.value,'bull-is-imps07','',0,'%')"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="bull-is-imps730">18%</b></div><input type="range" min="0" max="200" step="5" value="18" oninput="spIaa('bull','is','imps730',+this.value,'bull-is-imps730','',0,'%')"></div>
+  <div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--blue-bg);border-radius:5px;font-size:10px;margin-top:2px"><span style="color:var(--blue)">D30 imps/DAU</span><span style="font-weight:700;color:var(--blue)" id="bull-is-d30imps">2.9</span></div>
+</div>
+<div id="bull-bn-params" style="display:none;background:var(--bg);border-radius:6px;padding:8px;margin-bottom:6px;border:0.5px solid var(--border)">
+  <div style="font-size:10px;font-weight:600;color:var(--text2);margin-bottom:6px">BN / Banner</div>
+  <div class="ctrl"><div class="ctrl-lbl">eCPM <b id="bull-bn-ecpm">$1.5</b></div><input type="range" min="0.5" max="100" step="0.5" value="1.5" oninput="spIaa('bull','bn','ecpm',+this.value,'bull-bn-ecpm','$',1)"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D0 imps/DAU <b id="bull-bn-d0imps">0</b></div><input type="range" min="0" max="30" step="0.5" value="0" oninput="spIaa('bull','bn','d0imps',+this.value,'bull-bn-d0imps','',1)"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="bull-bn-imps07">0%</b></div><input type="range" min="0" max="300" step="5" value="0" oninput="spIaa('bull','bn','imps07',+this.value,'bull-bn-imps07','',0,'%')"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="bull-bn-imps730">0%</b></div><input type="range" min="0" max="200" step="5" value="0" oninput="spIaa('bull','bn','imps730',+this.value,'bull-bn-imps730','',0,'%')"></div>
+  <div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--blue-bg);border-radius:5px;font-size:10px;margin-top:2px"><span style="color:var(--blue)">D30 imps/DAU</span><span style="font-weight:700;color:var(--blue)" id="bull-bn-d30imps">0.0</span></div>
+</div>
+    <div style="display:flex;justify-content:space-between;padding:5px 8px;background:var(--green-bg);border-radius:6px;font-size:11px"><span style="color:var(--green)">Blended ARPDAU</span><span style="font-weight:700;color:var(--green)" id="bull-iaa-arpdau">-</span></div>
+  </div>
+</div>
+
         <!-- BASE -->
-        <div class="sc-col base">
-          <div class="sc-col-title">— 현실안</div>
-          <div class="param-group">
-            <div class="param-group-title">리텐션</div>
-            <div class="ctrl"><div class="ctrl-lbl">D1 리텐션 <b id="bm-d1">50%</b></div><input type="range" min="20" max="80" step="1" value="50" oninput="sp('base','d1ret',+this.value,'bm-d1','',1,'%');syncD7('base')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">D7 리텐션 <span class="linked" id="base-d7-link" onclick="toggleLink('base')">D1 연동</span><b id="bm-d7">25%</b></div><input type="range" min="5" max="50" step="0.5" value="25" id="base-d7-slider" oninput="sp('base','d7ret',+this.value,'bm-d7','',1,'%')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">D30 리텐션 <span class="linked" id="base-d30-link" onclick="toggleD30Link('base')">D1 연동</span><b id="bm-d30">10%</b></div><input type="range" min="2" max="25" step="0.5" value="10" id="base-d30-slider" oninput="SC.base.d30linked=false;document.getElementById('base-d30-link').textContent='수동';document.getElementById('base-d30-link').style.color='var(--text2)';sp('base','d30ret',+this.value,'bm-d30','',1,'%')"></div>
-          </div>
-          <div class="param-group">
-            <div class="param-group-title">LTV — IAP</div>
-            <div class="ctrl"><div class="ctrl-lbl">PUR <b id="base-pur">5%</b></div><input type="range" min="0" max="50" step="0.5" value="5" oninput="sp('base','pur',+this.value,'base-pur','',1,'%');updArppu('base')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">D0 ARPPU <b id="base-d0ap">$4</b></div><input type="range" min="0.5" max="100" step="0.5" value="4" oninput="sp('base','d0arppu',+this.value,'base-d0ap','$',2);updArppu('base')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="base-ap07">60%</b></div><input type="range" min="0" max="500" step="10" value="60" oninput="sp('base','arppu07',+this.value,'base-ap07','',0,'%');updArppu('base')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="base-ap730">30%</b></div><input type="range" min="0" max="500" step="10" value="30" oninput="sp('base','arppu730',+this.value,'base-ap730','',0,'%');updArppu('base')"></div>
-            <div style="display:flex;justify-content:space-between;padding:5px 8px;background:var(--green-bg);border-radius:6px;font-size:11px;margin-top:2px">
-              <span style="color:var(--green)">D30 ARPPU</span>
-              <span style="font-weight:700;color:var(--green)" id="base-d30ap">$8.32</span>
-            </div>
-          </div>
-          <div class="param-group">
-            <div class="param-group-title">UA / 광고</div>
-            <div class="ctrl"><div class="ctrl-lbl">초기 CPI <b id="base-cpi">$0.7</b></div><input type="range" min="0.2" max="3.0" step="0.05" value="0.7" oninput="sp('base','cpi',+this.value,'base-cpi','$',2)"></div>
-            <div class="ctrl">
-              <div class="ctrl-lbl"><span style="display:flex;align-items:center;gap:1px">기준 eCPM<span class="info-btn" onclick="toggleInfo('base-ecpm-info')">ℹ</span></span><b id="base-ecpmBase">$34.1</b>
-              </div>
-              <input type="range" min="5" max="80" step="0.5" value="34.1" oninput="sp('base','ecpmBase',+this.value,'base-ecpmBase','$',1)">
-              <div class="info-box" id="base-ecpm-info">현재 실측 eCPM $34.1 기준. imps/DAU 10 고정 시 ARPDAU = eCPM × 10 / 1000.</div>
-            </div>
-            <div class="ctrl">
-              <div class="ctrl-lbl"><span style="display:flex;align-items:center;gap:1px">월별 eCPM 변화율<span class="info-btn" onclick="toggleInfo('base-ecpmr-info')">ℹ</span></span><b id="base-ecpmRate">-1%/월</b>
-              </div>
-              <input type="range" min="-10" max="10" step="0.5" value="-1" oninput="sp('base','ecpmRate',+this.value,'base-ecpmRate','',1,'%/월')">
-              <div class="info-box" id="base-ecpmr-info">UA 스케일업 초기 신규 유저 광고 참여율 저하로 하락 가능. 네트워크 최적화 후 반등 시 양수 설정. 최저 기준 eCPM의 30%까지 하락.</div>
-            </div>
-            <div class="ctrl"><div class="ctrl-lbl">오가닉 비율 <b id="base-org">20%</b></div><input type="range" min="0" max="60" step="5" value="20" oninput="sp('base','organic',+this.value,'base-org','',0,'%')"></div>
-          </div>
-        </div>
+<div class="sc-col base">
+  <div class="sc-col-title">— 현실안</div>
+  <div class="param-group">
+    <div class="param-group-title">리텐션</div>
+    <div class="ctrl"><div class="ctrl-lbl">D1 리텐션 <b id="bm-d1">50%</b></div><input type="range" min="20" max="80" step="1" value="50" oninput="sp('base','d1ret',+this.value,'bm-d1','',1,'%');syncD7('base')"></div>
+    <div class="ctrl"><div class="ctrl-lbl">D7 리텐션 <span class="linked" id="base-d7-link" onclick="toggleLink('base')">D1 연동</span><b id="bm-d7">25%</b></div><input type="range" min="5" max="50" step="0.5" value="25" id="base-d7-slider" oninput="sp('base','d7ret',+this.value,'bm-d7','',1,'%')"></div>
+    <div class="ctrl"><div class="ctrl-lbl">D30 리텐션 <span class="linked" id="base-d30-link" onclick="toggleD30Link('base')">D1 연동</span><b id="bm-d30">10%</b></div><input type="range" min="2" max="25" step="0.5" value="10" id="base-d30-slider" oninput="SC.base.d30linked=false;document.getElementById('base-d30-link').textContent='수동';document.getElementById('base-d30-link').style.color='var(--text2)';sp('base','d30ret',+this.value,'bm-d30','',1,'%')"></div>
+  </div>
+  <div class="param-group">
+    <div class="param-group-title">LTV — IAP</div>
+    <div class="ctrl"><div class="ctrl-lbl">PUR <b id="base-pur">5%</b></div><input type="range" min="0" max="50" step="0.5" value="5" oninput="sp('base','pur',+this.value,'base-pur','',1,'%');updArppu('base')"></div>
+    <div class="ctrl"><div class="ctrl-lbl">D0 ARPPU <b id="base-d0ap">$4</b></div><input type="range" min="0.5" max="100" step="0.5" value="4" oninput="sp('base','d0arppu',+this.value,'base-d0ap','$',2);updArppu('base')"></div>
+    <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="base-ap07">60%</b></div><input type="range" min="0" max="500" step="10" value="60" oninput="sp('base','arppu07',+this.value,'base-ap07','',0,'%');updArppu('base')"></div>
+    <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="base-ap730">30%</b></div><input type="range" min="0" max="500" step="10" value="30" oninput="sp('base','arppu730',+this.value,'base-ap730','',0,'%');updArppu('base')"></div>
+    <div style="display:flex;justify-content:space-between;padding:5px 8px;background:var(--green-bg);border-radius:6px;font-size:11px;margin-top:2px"><span style="color:var(--green)">D30 ARPPU</span><span style="font-weight:700;color:var(--green)" id="base-d30ap">$8.32</span></div>
+  </div>
+  <div class="param-group">
+    <div class="param-group-title">UA</div>
+    <div class="ctrl"><div class="ctrl-lbl">초기 CPI <b id="base-cpi">$0.70</b></div><input type="range" min="0.2" max="3.0" step="0.05" value="0.70" oninput="sp('base','cpi',+this.value,'base-cpi','$',2)"></div>
+    <div class="ctrl"><div class="ctrl-lbl">오가닉 비율 <b id="base-org">20%</b></div><input type="range" min="0" max="60" step="5" value="20" oninput="sp('base','organic',+this.value,'base-org','',0,'%')"></div>
+  </div>
+  <div class="param-group">
+    <div class="param-group-title" style="display:flex;align-items:center;gap:4px">LTV — IAA
+      <span style="display:inline-flex;gap:3px;margin-left:4px">
+        <span id="base-rv-toggle" onclick="toggleAdType('base','rv')" style="font-size:10px;padding:1px 7px;border:0.5px solid var(--border2);border-radius:4px;cursor:pointer;background:var(--blue-bg);color:var(--blue);border-color:var(--blue-border)">RV</span>
+        <span id="base-is-toggle" onclick="toggleAdType('base','is')" style="font-size:10px;padding:1px 7px;border:0.5px solid var(--border2);border-radius:4px;cursor:pointer;background:var(--blue-bg);color:var(--blue);border-color:var(--blue-border)">IS</span>
+        <span id="base-bn-toggle" onclick="toggleAdType('base','bn')" style="font-size:10px;padding:1px 7px;border:0.5px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2)">BN</span>
+      </span>
+    </div>
+<div id="base-rv-params" style="display:block;background:var(--bg);border-radius:6px;padding:8px;margin-bottom:6px;border:0.5px solid var(--border)">
+  <div style="font-size:10px;font-weight:600;color:var(--text2);margin-bottom:6px">RV / Rewarded Video</div>
+  <div class="ctrl"><div class="ctrl-lbl">eCPM <b id="base-rv-ecpm">$41</b></div><input type="range" min="0.5" max="100" step="0.5" value="41" oninput="spIaa('base','rv','ecpm',+this.value,'base-rv-ecpm','$',1)"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D0 imps/DAU <b id="base-rv-d0imps">5.0</b></div><input type="range" min="0" max="30" step="0.5" value="5.0" oninput="spIaa('base','rv','d0imps',+this.value,'base-rv-d0imps','',1)"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="base-rv-imps07">40%</b></div><input type="range" min="0" max="300" step="5" value="40" oninput="spIaa('base','rv','imps07',+this.value,'base-rv-imps07','',0,'%')"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="base-rv-imps730">20%</b></div><input type="range" min="0" max="200" step="5" value="20" oninput="spIaa('base','rv','imps730',+this.value,'base-rv-imps730','',0,'%')"></div>
+  <div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--blue-bg);border-radius:5px;font-size:10px;margin-top:2px"><span style="color:var(--blue)">D30 imps/DAU</span><span style="font-weight:700;color:var(--blue)" id="base-rv-d30imps">8.4</span></div>
+</div>
+<div id="base-is-params" style="display:block;background:var(--bg);border-radius:6px;padding:8px;margin-bottom:6px;border:0.5px solid var(--border)">
+  <div style="font-size:10px;font-weight:600;color:var(--text2);margin-bottom:6px">IS / Interstitial</div>
+  <div class="ctrl"><div class="ctrl-lbl">eCPM <b id="base-is-ecpm">$18</b></div><input type="range" min="0.5" max="100" step="0.5" value="18" oninput="spIaa('base','is','ecpm',+this.value,'base-is-ecpm','$',1)"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D0 imps/DAU <b id="base-is-d0imps">1.5</b></div><input type="range" min="0" max="30" step="0.5" value="1.5" oninput="spIaa('base','is','d0imps',+this.value,'base-is-d0imps','',1)"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="base-is-imps07">35%</b></div><input type="range" min="0" max="300" step="5" value="35" oninput="spIaa('base','is','imps07',+this.value,'base-is-imps07','',0,'%')"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="base-is-imps730">15%</b></div><input type="range" min="0" max="200" step="5" value="15" oninput="spIaa('base','is','imps730',+this.value,'base-is-imps730','',0,'%')"></div>
+  <div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--blue-bg);border-radius:5px;font-size:10px;margin-top:2px"><span style="color:var(--blue)">D30 imps/DAU</span><span style="font-weight:700;color:var(--blue)" id="base-is-d30imps">2.3</span></div>
+</div>
+<div id="base-bn-params" style="display:none;background:var(--bg);border-radius:6px;padding:8px;margin-bottom:6px;border:0.5px solid var(--border)">
+  <div style="font-size:10px;font-weight:600;color:var(--text2);margin-bottom:6px">BN / Banner</div>
+  <div class="ctrl"><div class="ctrl-lbl">eCPM <b id="base-bn-ecpm">$1.5</b></div><input type="range" min="0.5" max="100" step="0.5" value="1.5" oninput="spIaa('base','bn','ecpm',+this.value,'base-bn-ecpm','$',1)"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D0 imps/DAU <b id="base-bn-d0imps">0</b></div><input type="range" min="0" max="30" step="0.5" value="0" oninput="spIaa('base','bn','d0imps',+this.value,'base-bn-d0imps','',1)"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="base-bn-imps07">0%</b></div><input type="range" min="0" max="300" step="5" value="0" oninput="spIaa('base','bn','imps07',+this.value,'base-bn-imps07','',0,'%')"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="base-bn-imps730">0%</b></div><input type="range" min="0" max="200" step="5" value="0" oninput="spIaa('base','bn','imps730',+this.value,'base-bn-imps730','',0,'%')"></div>
+  <div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--blue-bg);border-radius:5px;font-size:10px;margin-top:2px"><span style="color:var(--blue)">D30 imps/DAU</span><span style="font-weight:700;color:var(--blue)" id="base-bn-d30imps">0.0</span></div>
+</div>
+    <div style="display:flex;justify-content:space-between;padding:5px 8px;background:var(--green-bg);border-radius:6px;font-size:11px"><span style="color:var(--green)">Blended ARPDAU</span><span style="font-weight:700;color:var(--green)" id="base-iaa-arpdau">-</span></div>
+  </div>
+</div>
+
         <!-- BEAR -->
-        <div class="sc-col bear">
-          <div class="sc-col-title">▼ 보수안</div>
-          <div class="param-group">
-            <div class="param-group-title">리텐션</div>
-            <div class="ctrl"><div class="ctrl-lbl">D1 리텐션 <b id="bw-d1">45%</b></div><input type="range" min="20" max="80" step="1" value="45" oninput="sp('bear','d1ret',+this.value,'bw-d1','',1,'%');syncD7('bear')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">D7 리텐션 <span class="linked" id="bear-d7-link" onclick="toggleLink('bear')">D1 연동</span><b id="bw-d7">22.5%</b></div><input type="range" min="5" max="50" step="0.5" value="22.5" id="bear-d7-slider" oninput="sp('bear','d7ret',+this.value,'bw-d7','',1,'%')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">D30 리텐션 <span class="linked" id="bear-d30-link" onclick="toggleD30Link('bear')">D1 연동</span><b id="bw-d30">9%</b></div><input type="range" min="2" max="25" step="0.5" value="9" id="bear-d30-slider" oninput="SC.bear.d30linked=false;document.getElementById('bear-d30-link').textContent='수동';document.getElementById('bear-d30-link').style.color='var(--text2)';sp('bear','d30ret',+this.value,'bw-d30','',1,'%')"></div>
-          </div>
-          <div class="param-group">
-            <div class="param-group-title">LTV — IAP</div>
-            <div class="ctrl"><div class="ctrl-lbl">PUR <b id="bear-pur">4.5%</b></div><input type="range" min="0" max="50" step="0.5" value="4.5" oninput="sp('bear','pur',+this.value,'bear-pur','',1,'%');updArppu('bear')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">D0 ARPPU <b id="bear-d0ap">$3</b></div><input type="range" min="0.5" max="100" step="0.5" value="3" oninput="sp('bear','d0arppu',+this.value,'bear-d0ap','$',2);updArppu('bear')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="bear-ap07">40%</b></div><input type="range" min="0" max="500" step="10" value="40" oninput="sp('bear','arppu07',+this.value,'bear-ap07','',0,'%');updArppu('bear')"></div>
-            <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="bear-ap730">15%</b></div><input type="range" min="0" max="500" step="10" value="15" oninput="sp('bear','arppu730',+this.value,'bear-ap730','',0,'%');updArppu('bear')"></div>
-            <div style="display:flex;justify-content:space-between;padding:5px 8px;background:var(--green-bg);border-radius:6px;font-size:11px;margin-top:2px">
-              <span style="color:var(--green)">D30 ARPPU</span>
-              <span style="font-weight:700;color:var(--green)" id="bear-d30ap">$4.83</span>
-            </div>
-          </div>
-          <div class="param-group">
-            <div class="param-group-title">UA / 광고</div>
-            <div class="ctrl"><div class="ctrl-lbl">초기 CPI <b id="bear-cpi">$0.77</b></div><input type="range" min="0.2" max="3.0" step="0.05" value="0.77" oninput="sp('bear','cpi',+this.value,'bear-cpi','$',2)"></div>
-            <div class="ctrl">
-              <div class="ctrl-lbl"><span style="display:flex;align-items:center;gap:1px">기준 eCPM<span class="info-btn" onclick="toggleInfo('bear-ecpm-info')">ℹ</span></span><b id="bear-ecpmBase">$34.1</b>
-              </div>
-              <input type="range" min="5" max="80" step="0.5" value="34.1" oninput="sp('bear','ecpmBase',+this.value,'bear-ecpmBase','$',1)">
-              <div class="info-box" id="bear-ecpm-info">현재 실측 eCPM $34.1 기준. imps/DAU 10 고정 시 ARPDAU = eCPM × 10 / 1000.</div>
-            </div>
-            <div class="ctrl">
-              <div class="ctrl-lbl"><span style="display:flex;align-items:center;gap:1px">월별 eCPM 변화율<span class="info-btn" onclick="toggleInfo('bear-ecpmr-info')">ℹ</span></span><b id="bear-ecpmRate">-4%/월</b>
-              </div>
-              <input type="range" min="-10" max="10" step="0.5" value="-4" oninput="sp('bear','ecpmRate',+this.value,'bear-ecpmRate','',1,'%/월')">
-              <div class="info-box" id="bear-ecpmr-info">UA 스케일업 초기 신규 유저 광고 참여율 저하로 하락 가능. 네트워크 최적화 후 반등 시 양수 설정. 최저 기준 eCPM의 30%까지 하락.</div>
-            </div>
-            <div class="ctrl"><div class="ctrl-lbl">오가닉 비율 <b id="bear-org">15%</b></div><input type="range" min="0" max="60" step="5" value="15" oninput="sp('bear','organic',+this.value,'bear-org','',0,'%')"></div>
-          </div>
-        </div>
+<div class="sc-col bear">
+  <div class="sc-col-title">▼ 보수안</div>
+  <div class="param-group">
+    <div class="param-group-title">리텐션</div>
+    <div class="ctrl"><div class="ctrl-lbl">D1 리텐션 <b id="bw-d1">45%</b></div><input type="range" min="20" max="80" step="1" value="45" oninput="sp('bear','d1ret',+this.value,'bw-d1','',1,'%');syncD7('bear')"></div>
+    <div class="ctrl"><div class="ctrl-lbl">D7 리텐션 <span class="linked" id="bear-d7-link" onclick="toggleLink('bear')">D1 연동</span><b id="bw-d7">22.5%</b></div><input type="range" min="5" max="50" step="0.5" value="22.5" id="bear-d7-slider" oninput="sp('bear','d7ret',+this.value,'bw-d7','',1,'%')"></div>
+    <div class="ctrl"><div class="ctrl-lbl">D30 리텐션 <span class="linked" id="bear-d30-link" onclick="toggleD30Link('bear')">D1 연동</span><b id="bw-d30">9%</b></div><input type="range" min="2" max="25" step="0.5" value="9" id="bear-d30-slider" oninput="SC.bear.d30linked=false;document.getElementById('bear-d30-link').textContent='수동';document.getElementById('bear-d30-link').style.color='var(--text2)';sp('bear','d30ret',+this.value,'bw-d30','',1,'%')"></div>
+  </div>
+  <div class="param-group">
+    <div class="param-group-title">LTV — IAP</div>
+    <div class="ctrl"><div class="ctrl-lbl">PUR <b id="bear-pur">4.5%</b></div><input type="range" min="0" max="50" step="0.5" value="4.5" oninput="sp('bear','pur',+this.value,'bear-pur','',1,'%');updArppu('bear')"></div>
+    <div class="ctrl"><div class="ctrl-lbl">D0 ARPPU <b id="bear-d0ap">$3</b></div><input type="range" min="0.5" max="100" step="0.5" value="3" oninput="sp('bear','d0arppu',+this.value,'bear-d0ap','$',2);updArppu('bear')"></div>
+    <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="bear-ap07">40%</b></div><input type="range" min="0" max="500" step="10" value="40" oninput="sp('bear','arppu07',+this.value,'bear-ap07','',0,'%');updArppu('bear')"></div>
+    <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="bear-ap730">15%</b></div><input type="range" min="0" max="500" step="10" value="15" oninput="sp('bear','arppu730',+this.value,'bear-ap730','',0,'%');updArppu('bear')"></div>
+    <div style="display:flex;justify-content:space-between;padding:5px 8px;background:var(--green-bg);border-radius:6px;font-size:11px;margin-top:2px"><span style="color:var(--green)">D30 ARPPU</span><span style="font-weight:700;color:var(--green)" id="bear-d30ap">$4.83</span></div>
+  </div>
+  <div class="param-group">
+    <div class="param-group-title">UA</div>
+    <div class="ctrl"><div class="ctrl-lbl">초기 CPI <b id="bear-cpi">$0.77</b></div><input type="range" min="0.2" max="3.0" step="0.05" value="0.77" oninput="sp('bear','cpi',+this.value,'bear-cpi','$',2)"></div>
+    <div class="ctrl"><div class="ctrl-lbl">오가닉 비율 <b id="bear-org">15%</b></div><input type="range" min="0" max="60" step="5" value="15" oninput="sp('bear','organic',+this.value,'bear-org','',0,'%')"></div>
+  </div>
+  <div class="param-group">
+    <div class="param-group-title" style="display:flex;align-items:center;gap:4px">LTV — IAA
+      <span style="display:inline-flex;gap:3px;margin-left:4px">
+        <span id="bear-rv-toggle" onclick="toggleAdType('bear','rv')" style="font-size:10px;padding:1px 7px;border:0.5px solid var(--border2);border-radius:4px;cursor:pointer;background:var(--blue-bg);color:var(--blue);border-color:var(--blue-border)">RV</span>
+        <span id="bear-is-toggle" onclick="toggleAdType('bear','is')" style="font-size:10px;padding:1px 7px;border:0.5px solid var(--border2);border-radius:4px;cursor:pointer;background:var(--blue-bg);color:var(--blue);border-color:var(--blue-border)">IS</span>
+        <span id="bear-bn-toggle" onclick="toggleAdType('bear','bn')" style="font-size:10px;padding:1px 7px;border:0.5px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2)">BN</span>
+      </span>
+    </div>
+<div id="bear-rv-params" style="display:block;background:var(--bg);border-radius:6px;padding:8px;margin-bottom:6px;border:0.5px solid var(--border)">
+  <div style="font-size:10px;font-weight:600;color:var(--text2);margin-bottom:6px">RV / Rewarded Video</div>
+  <div class="ctrl"><div class="ctrl-lbl">eCPM <b id="bear-rv-ecpm">$38</b></div><input type="range" min="0.5" max="100" step="0.5" value="38" oninput="spIaa('bear','rv','ecpm',+this.value,'bear-rv-ecpm','$',1)"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D0 imps/DAU <b id="bear-rv-d0imps">4.0</b></div><input type="range" min="0" max="30" step="0.5" value="4.0" oninput="spIaa('bear','rv','d0imps',+this.value,'bear-rv-d0imps','',1)"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="bear-rv-imps07">32%</b></div><input type="range" min="0" max="300" step="5" value="32" oninput="spIaa('bear','rv','imps07',+this.value,'bear-rv-imps07','',0,'%')"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="bear-rv-imps730">15%</b></div><input type="range" min="0" max="200" step="5" value="15" oninput="spIaa('bear','rv','imps730',+this.value,'bear-rv-imps730','',0,'%')"></div>
+  <div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--blue-bg);border-radius:5px;font-size:10px;margin-top:2px"><span style="color:var(--blue)">D30 imps/DAU</span><span style="font-weight:700;color:var(--blue)" id="bear-rv-d30imps">6.1</span></div>
+</div>
+<div id="bear-is-params" style="display:block;background:var(--bg);border-radius:6px;padding:8px;margin-bottom:6px;border:0.5px solid var(--border)">
+  <div style="font-size:10px;font-weight:600;color:var(--text2);margin-bottom:6px">IS / Interstitial</div>
+  <div class="ctrl"><div class="ctrl-lbl">eCPM <b id="bear-is-ecpm">$15</b></div><input type="range" min="0.5" max="100" step="0.5" value="15" oninput="spIaa('bear','is','ecpm',+this.value,'bear-is-ecpm','$',1)"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D0 imps/DAU <b id="bear-is-d0imps">1.2</b></div><input type="range" min="0" max="30" step="0.5" value="1.2" oninput="spIaa('bear','is','d0imps',+this.value,'bear-is-d0imps','',1)"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="bear-is-imps07">28%</b></div><input type="range" min="0" max="300" step="5" value="28" oninput="spIaa('bear','is','imps07',+this.value,'bear-is-imps07','',0,'%')"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="bear-is-imps730">12%</b></div><input type="range" min="0" max="200" step="5" value="12" oninput="spIaa('bear','is','imps730',+this.value,'bear-is-imps730','',0,'%')"></div>
+  <div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--blue-bg);border-radius:5px;font-size:10px;margin-top:2px"><span style="color:var(--blue)">D30 imps/DAU</span><span style="font-weight:700;color:var(--blue)" id="bear-is-d30imps">1.7</span></div>
+</div>
+<div id="bear-bn-params" style="display:none;background:var(--bg);border-radius:6px;padding:8px;margin-bottom:6px;border:0.5px solid var(--border)">
+  <div style="font-size:10px;font-weight:600;color:var(--text2);margin-bottom:6px">BN / Banner</div>
+  <div class="ctrl"><div class="ctrl-lbl">eCPM <b id="bear-bn-ecpm">$1.5</b></div><input type="range" min="0.5" max="100" step="0.5" value="1.5" oninput="spIaa('bear','bn','ecpm',+this.value,'bear-bn-ecpm','$',1)"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D0 imps/DAU <b id="bear-bn-d0imps">0</b></div><input type="range" min="0" max="30" step="0.5" value="0" oninput="spIaa('bear','bn','d0imps',+this.value,'bear-bn-d0imps','',1)"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D0→D7 증분 <b id="bear-bn-imps07">0%</b></div><input type="range" min="0" max="300" step="5" value="0" oninput="spIaa('bear','bn','imps07',+this.value,'bear-bn-imps07','',0,'%')"></div>
+  <div class="ctrl"><div class="ctrl-lbl">D7→D30 증분 <b id="bear-bn-imps730">0%</b></div><input type="range" min="0" max="200" step="5" value="0" oninput="spIaa('bear','bn','imps730',+this.value,'bear-bn-imps730','',0,'%')"></div>
+  <div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--blue-bg);border-radius:5px;font-size:10px;margin-top:2px"><span style="color:var(--blue)">D30 imps/DAU</span><span style="font-weight:700;color:var(--blue)" id="bear-bn-d30imps">0.0</span></div>
+</div>
+    <div style="display:flex;justify-content:space-between;padding:5px 8px;background:var(--green-bg);border-radius:6px;font-size:11px"><span style="color:var(--green)">Blended ARPDAU</span><span style="font-weight:700;color:var(--green)" id="bear-iaa-arpdau">-</span></div>
+  </div>
+</div>
+
       </div>
     </div>
   </div>
@@ -512,12 +572,33 @@ let PERIOD = {
   startMonth:3, totalMonths:9, numPhases:3, phaseLens:[1,2,6]
 };
 let SC = {
-  bull:{d1ret:55,d7ret:27.5,d30ret:11,pur:5.5,d0arppu:5,arppu07:80,arppu730:50,
-        cpi:0.63,ecpmBase:34.1,ecpmRate:2,organic:25,mat:82,d7linked:true,d30linked:true},
-  base:{d1ret:50,d7ret:25,  d30ret:10,pur:5,  d0arppu:4,arppu07:60,arppu730:30,
-        cpi:0.70,ecpmBase:34.1,ecpmRate:-1,organic:20,mat:80,d7linked:true,d30linked:true},
-  bear:{d1ret:45,d7ret:22.5,d30ret:9, pur:4.5,d0arppu:3,arppu07:40,arppu730:15,
-        cpi:0.77,ecpmBase:34.1,ecpmRate:-4,organic:15,mat:78,d7linked:true,d30linked:true},
+  bull:{
+    d1ret:55,d7ret:27.5,d30ret:11,pur:5.5,d0arppu:5,arppu07:80,arppu730:50,
+    cpi:0.63,organic:25,mat:82,d7linked:true,d30linked:true,
+    iaa:{
+      rv:{on:true, ecpm:44,  d0imps:5.5, imps07:45, imps730:22},
+      is:{on:true, ecpm:20,  d0imps:1.8, imps07:38, imps730:18},
+      bn:{on:false,ecpm:1.5, d0imps:0,   imps07:0,  imps730:0},
+    }
+  },
+  base:{
+    d1ret:50,d7ret:25,d30ret:10,pur:5,d0arppu:4,arppu07:60,arppu730:30,
+    cpi:0.70,organic:20,mat:80,d7linked:true,d30linked:true,
+    iaa:{
+      rv:{on:true, ecpm:41,  d0imps:5.0, imps07:40, imps730:20},
+      is:{on:true, ecpm:18,  d0imps:1.5, imps07:35, imps730:15},
+      bn:{on:false,ecpm:1.5, d0imps:0,   imps07:0,  imps730:0},
+    }
+  },
+  bear:{
+    d1ret:45,d7ret:22.5,d30ret:9,pur:4.5,d0arppu:3,arppu07:40,arppu730:15,
+    cpi:0.77,organic:15,mat:78,d7linked:true,d30linked:true,
+    iaa:{
+      rv:{on:true, ecpm:38,  d0imps:4.0, imps07:32, imps730:15},
+      is:{on:true, ecpm:15,  d0imps:1.2, imps07:28, imps730:12},
+      bn:{on:false,ecpm:1.5, d0imps:0,   imps07:0,  imps730:0},
+    }
+  },
 };
 let detailTab='all';
 let charts={};
@@ -573,17 +654,35 @@ const BASE_ARPDAU_IAA=0.3577;
 // ============================================================
 // 시뮬레이션
 // ============================================================
+// IAA D30 imps/DAU 계산 (타입별)
+function calcIaaSummary(p){
+  // 각 타입의 D30 imps/DAU = D0 × (1+imps07/100) × (1+imps730/100)
+  let totalArpdau=0, blendedEcpm=0, totalImps=0;
+  ['rv','is','bn'].forEach(t=>{
+    const ad=p.iaa[t];
+    if(!ad.on) return;
+    const d30imps=ad.d0imps*(1+ad.imps07/100)*(1+ad.imps730/100);
+    const arpdau=ad.ecpm*d30imps/1000;
+    totalArpdau+=arpdau;
+    totalImps+=d30imps;
+  });
+  blendedEcpm=totalImps>0?totalArpdau*1000/totalImps:0;
+  return {arpdau:totalArpdau, ecpm:blendedEcpm, imps:totalImps};
+}
+
 function simSc(p){
   const MOS=getMOS(), DAYS=getDAYS(), PH=getPH();
-  let dau=START_DAU, rows=[], cum=0, ecpm=p.ecpmBase;
+  let dau=START_DAU, rows=[], cum=0;
   for(let i=0;i<PERIOD.totalMonths;i++){
     const ua=getUA(i);
     const cpi=p.cpi*(1+0.02*i);
     const paid=cpi>0?ua/cpi:0;
     const newU=paid*(1+p.organic/100);
     dau=Math.max(dau*(p.mat/100)+newU*(p.d1ret/100)*0.40, START_DAU*0.15);
-    ecpm=Math.max(ecpm*(1+p.ecpmRate/100), p.ecpmBase*0.3);
-    const iaaArpdau=ecpm*BASE_IMPS/1000;
+    // IAA: 타입별 합산
+    const iaaSum=calcIaaSummary(p);
+    const iaaArpdau=iaaSum.arpdau;
+    // IAP
     const d7arppu=p.d0arppu*(1+p.arppu07/100);
     const d30arppu=d7arppu*(1+p.arppu730/100);
     const calib=(retIntegral(p.d1ret,p.d7ret,p.d30ret)/BASE_CALIB)*(BASE_LTV/BASE_ARPDAU_IAA);
@@ -599,12 +698,12 @@ function simSc(p){
       net:Math.round(rev-ua),
       margin:rev>0?(rev-ua)/rev*100:0,
       cum:Math.round(cum),
-      ecpm:+ecpm.toFixed(2),
+      ecpm:+iaaSum.ecpm.toFixed(2),
       arpdau:+(iaaArpdau+iapArpdau).toFixed(4),
       cpi:+cpi.toFixed(3),
       d30arppu:+d30arppu.toFixed(2),
       d30iap:+d30iap.toFixed(3),
-      d30ltv:+(p.ecpmBase*BASE_IMPS/1000*calib + d30iap).toFixed(2),
+      d30ltv:+(iaaSum.arpdau*calib + d30iap).toFixed(2),
     });
   }
   return rows;
@@ -686,7 +785,7 @@ function buildLTV(all){
     const d30ap=d7ap*(1+p.arppu730/100);
     const d30iap=(p.pur/100)*d30ap;
     const calib=(retIntegral(p.d1ret,p.d7ret,p.d30ret)/BASE_CALIB)*(BASE_LTV/BASE_ARPDAU_IAA);
-    const d30iaa=p.ecpmBase*BASE_IMPS/1000*calib;
+    const iaaS=calcIaaSummary(p); const d30iaa=iaaS.arpdau*calib;
     const d30tot=d30iaa+d30iap;
     const iapPct=d30tot>0?d30iap/d30tot*100:0;
     const incr=d30tot-0.93;
@@ -979,6 +1078,41 @@ function updUALabel(){
 // ============================================================
 // 파라미터 슬라이더
 // ============================================================
+// IAA 파라미터 업데이트
+function spIaa(sc,adType,key,val,lid,pre,dec,suf){
+  SC[sc].iaa[adType][key]=val;
+  const d=dec!==undefined?+dec:0;
+  document.getElementById(lid).textContent=(pre||'')+(d>0?val.toFixed(d):Math.round(val))+(suf||'');
+  updIaaD30imps(sc,adType);
+  updIaaArpdau(sc);
+  render();
+}
+function updIaaD30imps(sc,t){
+  const ad=SC[sc].iaa[t];
+  const d30=ad.d0imps*(1+ad.imps07/100)*(1+ad.imps730/100);
+  const el=document.getElementById(sc+'-'+t+'-d30imps');
+  if(el) el.textContent=d30.toFixed(1);
+}
+function updIaaArpdau(sc){
+  const s=calcIaaSummary(SC[sc]);
+  const el=document.getElementById(sc+'-iaa-arpdau');
+  if(el) el.textContent='$'+s.arpdau.toFixed(4);
+}
+function toggleAdType(sc,t){
+  SC[sc].iaa[t].on=!SC[sc].iaa[t].on;
+  const on=SC[sc].iaa[t].on;
+  const toggle=document.getElementById(sc+'-'+t+'-toggle');
+  const params=document.getElementById(sc+'-'+t+'-params');
+  if(toggle){
+    toggle.style.background=on?'var(--blue-bg)':'';
+    toggle.style.color=on?'var(--blue)':'var(--text2)';
+    toggle.style.borderColor=on?'var(--blue-border)':'var(--border2)';
+  }
+  if(params) params.style.display=on?'block':'none';
+  updIaaArpdau(sc);
+  render();
+}
+
 function sp(sc,key,val,lid,pre,dec,suf){
   SC[sc][key]=val;
   const d=dec!==undefined?+dec:0;
@@ -1091,7 +1225,7 @@ function loadSlot(n){
   if(data.uas) Object.keys(data.uas).forEach(i=>{const el=document.getElementById('p'+i+'ua');if(el)el.value=data.uas[i];});
   if(data.targetRev){const el=document.getElementById('targetRev');if(el)el.value=data.targetRev;}
   updPhBtns();renderUASection();renderPeriodSummary();
-  ['bull','base','bear'].forEach(sc=>syncD7(sc));
+  ['bull','base','bear'].forEach(sc=>{syncD7(sc);updIaaArpdau(sc);});
   render();
 }
 function deleteSlot(n){localStorage.removeItem(SLOT_KEYS[n]);renderSlotBtns();}
@@ -1133,13 +1267,33 @@ function syncAllSliders(){
     });
     updArppu(sc);
     syncD7(sc);
+    // IAA 타입별 슬라이더 라벨 업데이트
+    ['rv','is','bn'].forEach(t=>{
+      const ad=SC[sc].iaa[t];
+      const fields=[['ecpm','$',1],['d0imps','',1],['imps07','',0,'%'],['imps730','',0,'%']];
+      fields.forEach(([k,pre,dec,suf])=>{
+        const el=document.getElementById(sc+'-'+t+'-'+k);
+        if(el) el.textContent=(pre||'')+(dec>0?ad[k].toFixed(dec):Math.round(ad[k]))+(suf||'');
+      });
+      // on/off 상태
+      const toggle=document.getElementById(sc+'-'+t+'-toggle');
+      const params=document.getElementById(sc+'-'+t+'-params');
+      if(toggle){
+        toggle.style.background=ad.on?'var(--blue-bg)':'';
+        toggle.style.color=ad.on?'var(--blue)':'var(--text2)';
+        toggle.style.borderColor=ad.on?'var(--blue-border)':'var(--border2)';
+      }
+      if(params) params.style.display=ad.on?'block':'none';
+      updIaaD30imps(sc,t);
+    });
+    updIaaArpdau(sc);
   });
 }
 
 // ============================================================
 // 초기화
 // ============================================================
-['bull','base','bear'].forEach(sc=>syncD7(sc));
+['bull','base','bear'].forEach(sc=>{syncD7(sc);updIaaArpdau(sc);});
 renderUASection();
 renderPeriodSummary();
 updPhBtns();
