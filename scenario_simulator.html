@@ -146,6 +146,16 @@ hr{border:none;border-top:0.5px solid var(--border);margin:14px 0}
 .ph2{background:var(--amber-bg);color:var(--amber)}
 .ph3{background:var(--blue-bg);color:var(--blue)}
 .ph4{background:#EEEDFE;color:#534AB7}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:24px;width:320px;box-shadow:none}
+.modal-title{font-size:15px;font-weight:600;margin-bottom:8px}
+.modal-sub{font-size:12px;color:var(--text2);margin-bottom:16px}
+.modal-input{width:100%;border:0.5px solid var(--border2);border-radius:8px;padding:8px 12px;font-size:14px;background:var(--bg);color:var(--text);outline:none;margin-bottom:16px}
+.modal-input:focus{border-color:var(--blue)}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end}
+.modal-btns button{padding:7px 16px;border-radius:8px;font-size:13px;cursor:pointer;border:0.5px solid var(--border2);background:var(--card);color:var(--text)}
+.modal-btns .btn-primary{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:500}
 
 @media(max-width:768px){
   .sc-params-grid,.sc-summary,.kpi-grid,.two-col,.three-col{grid-template-columns:1fr}
@@ -178,7 +188,7 @@ hr{border:none;border-top:0.5px solid var(--border);margin:14px 0}
     </div>
   </div>
 </div>
-  <div class="page-sub">계획서 기반 · 3개 시나리오 비교 · Apr~Dec 2026</div>
+  <div class="page-sub" id="page-sub-dynamic" style="font-size:13px;color:var(--text2);margin-bottom:24px"></div>
 
   <!-- ===== PARAMS PANEL ===== -->
   <div class="params-panel">
@@ -467,6 +477,19 @@ hr{border:none;border-top:0.5px solid var(--border);margin:14px 0}
 
 </div>
 
+<!-- 저장 이름 모달 -->
+<div class="modal-overlay" id="save-modal">
+  <div class="modal-box">
+    <div class="modal-title">파라미터 저장</div>
+    <div class="modal-sub" id="save-modal-sub">슬롯에 저장합니다. 이름을 입력해 주세요.</div>
+    <input class="modal-input" id="save-modal-input" type="text" placeholder="예: 베이스라인, 공격적 UA 시나리오" maxlength="30">
+    <div class="modal-btns">
+      <button onclick="closeSaveModal()">취소</button>
+      <button class="btn-primary" onclick="confirmSave()">저장</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 // ============================================================
@@ -700,6 +723,44 @@ function buildLTV(all){
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
     x:{ticks:{font:{size:10},autoSkip:false,maxRotation:0},grid:{display:false}},
     y:{ticks:{font:{size:10},callback:v=>'$'+v.toFixed(0)},grid:{color:'rgba(0,0,0,0.05)'},min:0}}}});
+
+  // D0→D7→D30 Total LTV 증분 차트
+  const ltvPoints=['D0','D7','D30'];
+  const ltvDatasets=[];
+  const scDefs=[
+    {k:'bull',name:'공격안',iaaC:'rgba(15,110,86,0.75)',iapC:'rgba(15,110,86,0.35)'},
+    {k:'base',name:'현실안',iaaC:'rgba(24,95,165,0.75)',iapC:'rgba(24,95,165,0.35)'},
+    {k:'bear',name:'보수안',iaaC:'rgba(163,45,45,0.75)',iapC:'rgba(163,45,45,0.35)'},
+  ];
+  // 각 시나리오별 D0/D7/D30 IAA LTV + IAP LTV 계산
+  scDefs.forEach(sd=>{
+    const p=SC[sd.k];
+    const calib=(retIntegral(p.d1ret,p.d7ret,p.d30ret)/BASE_CALIB)*(BASE_LTV/BASE_ARPDAU_IAA);
+    // IAA LTV: D0=eCPM*imps/1000*calib*1일분, D7=7일분, D30=30일분 (누적)
+    const iaaD0=p.ecpmBase*BASE_IMPS/1000*1;
+    const iaaD7=p.ecpmBase*BASE_IMPS/1000*calib*(7/30);
+    const iaaD30=p.ecpmBase*BASE_IMPS/1000*calib;
+    // IAP LTV: PUR*ARPPU 비례
+    const d7ap=p.d0arppu*(1+p.arppu07/100);
+    const d30ap=d7ap*(1+p.arppu730/100);
+    const iapD0=(p.pur/100)*p.d0arppu;
+    const iapD7=(p.pur/100)*d7ap;
+    const iapD30=(p.pur/100)*d30ap;
+    ltvDatasets.push({label:sd.name+' IAA',data:[iaaD0,iaaD7,iaaD30],backgroundColor:sd.iaaC,stack:sd.k});
+    ltvDatasets.push({label:sd.name+' IAP',data:[iapD0,iapD7,iapD30],backgroundColor:sd.iapC,stack:sd.k});
+  });
+  // 현재 실측 D30 LTV 기준선
+  ltvDatasets.push({label:'현재 실측',data:[null,null,BASE_LTV],type:'line',borderColor:'rgba(100,100,100,0.5)',borderDash:[4,3],borderWidth:1.5,pointRadius:5,pointBackgroundColor:'rgba(100,100,100,0.5)',fill:false,stack:undefined});
+  buildChart('ltvChart',{type:'bar',data:{labels:ltvPoints,datasets:ltvDatasets},options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{
+      label:ctx=>ctx.dataset.label+': $'+ctx.raw?.toFixed?.(3)||''
+    }}},
+    scales:{
+      x:{stacked:true,ticks:{font:{size:12}},grid:{display:false}},
+      y:{stacked:true,ticks:{font:{size:10},callback:v=>'$'+v.toFixed(2)},grid:{color:'rgba(0,0,0,0.05)'}}
+    }
+  }});
 }
 
 // ============================================================
@@ -844,8 +905,11 @@ function fixPhaseLens(){
 function rebuildPeriod(){renderPeriodSummary();render();}
 function renderPeriodSummary(){
   const mos=getMOS();
+  const txt=mos[0]+' ~ '+mos[mos.length-1]+' ('+PERIOD.totalMonths+'개월)';
   const el=document.getElementById('period-summary');
-  if(el) el.textContent=mos[0]+' ~ '+mos[mos.length-1]+' ('+PERIOD.totalMonths+'개월)';
+  if(el) el.textContent=txt;
+  const sub=document.getElementById('page-sub-dynamic');
+  if(sub) sub.textContent='3개 시나리오 비교 · '+txt;
 }
 function updPhBtns(){
   [2,3,4].forEach(n=>{
@@ -988,21 +1052,30 @@ function getSlotData(){
     ts:new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})
   };
 }
+let _saveSlotIdx=null;
 function saveSlot(n){
-  const inputId='slot-name-input-'+(n+1);
-  const existing=document.getElementById(inputId);
-  if(existing){existing.remove();return;}
-  const row=document.getElementById('slot-row-'+(n+1));
-  const inp=document.createElement('input');
-  inp.type='text';inp.placeholder='이름 입력 (선택)';inp.id=inputId;
-  inp.style.cssText='font-size:11px;padding:3px 8px;border:0.5px solid var(--blue-border);border-radius:6px;background:var(--card);color:var(--text);width:120px;outline:none;margin-left:4px';
-  inp.onkeydown=function(e){
-    if(e.key==='Enter'){doSave(n,inp.value);inp.remove();}
-    if(e.key==='Escape') inp.remove();
-  };
-  inp.onblur=function(){setTimeout(()=>{const el=document.getElementById(inputId);if(el){doSave(n,inp.value);el.remove();}},200);};
-  row.appendChild(inp);inp.focus();
+  _saveSlotIdx=n;
+  const raw=localStorage.getItem(SLOT_KEYS[n]);
+  const existing=raw?JSON.parse(raw):null;
+  document.getElementById('save-modal-sub').textContent='슬롯 '+(n+1)+(existing?' (덮어쓰기)':'')+' 에 저장합니다.';
+  document.getElementById('save-modal-input').value=existing?existing.name:'';
+  document.getElementById('save-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('save-modal-input').focus(),50);
 }
+function closeSaveModal(){
+  document.getElementById('save-modal').classList.remove('open');
+  _saveSlotIdx=null;
+}
+function confirmSave(){
+  if(_saveSlotIdx===null) return;
+  doSave(_saveSlotIdx, document.getElementById('save-modal-input').value);
+  closeSaveModal();
+}
+// Enter로 확인
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&document.getElementById('save-modal').classList.contains('open')) confirmSave();
+  if(e.key==='Escape'&&document.getElementById('save-modal').classList.contains('open')) closeSaveModal();
+});
 function doSave(n,name){
   const data=getSlotData();
   data.name=name.trim()||('슬롯'+(n+1));
