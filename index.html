@@ -16,6 +16,15 @@
   --amber:#f0a030;--amber-bg:#2a1f08;--amber-dim:#3d2e10;
   --radius:8px;--radius-lg:12px;
 }
+body.light{
+  --bg:#f5f6fa;--bg2:#ffffff;--bg3:#f0f1f5;--bg4:#e4e6ed;
+  --border:#dde0ea;--border2:#c8ccd8;
+  --text:#1a1d27;--text2:#555a6e;--text3:#8b90a4;
+  --blue:#2b6be6;--blue-bg:#e8eef9;--blue-dim:#c0d0f0;
+  --green:#1a9e64;--green-bg:#e6f7ef;--green-dim:#b0e0cc;
+  --red:#d63030;--red-bg:#fde8e8;--red-dim:#f5bbbb;
+  --amber:#c07800;--amber-bg:#fef3e2;--amber-dim:#f5d9a0;
+}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;min-height:100vh}
 input,select,button{font-family:inherit;font-size:13px;color:var(--text)}
 button{cursor:pointer}
@@ -148,23 +157,20 @@ tr:last-child td{border-bottom:none}
   .main{padding:12px!important}
   .fbar,.exp-bar{display:none!important}
   body{background:#fff!important;color:#111!important;font-size:11px}
-  .vc{break-inside:avoid;page-break-inside:avoid;border:1px solid #ccc!important}
-  .vc.pass{background:#e6f7ef!important;border-color:#3ecf8e!important}
-  .vc.conditional{background:#fef3e2!important;border-color:#f0a030!important}
-  .vc.fail{background:#fde8e8!important;border-color:#f06060!important}
-  .vc-main,.vc-lbl{color:#111!important}
-  .mc{break-inside:avoid;page-break-inside:avoid;border:1px solid #ddd!important;background:#fafafa!important}
-  .tabs{border-bottom:1px solid #ccc!important}
-  .tab.on{color:#4f8ef7!important;border-bottom-color:#4f8ef7!important}
+  body:not(.light){--bg:#fff;--bg2:#fafafa;--bg3:#f0f0f0;--bg4:#e5e5e5;--border:#ddd;--border2:#ccc;--text:#111;--text2:#555;--text3:#888}
+  .vc{break-inside:avoid;page-break-inside:avoid}
+  .mc{break-inside:avoid;page-break-inside:avoid}
   .chart-wrap canvas{max-height:80px}
-  :root{--bg:#fff;--bg2:#fafafa;--bg3:#f0f0f0;--bg4:#e5e5e5;--border:#ddd;--border2:#ccc;--text:#111;--text2:#555;--text3:#888}
 }
 </style>
 </head>
 <body>
 <div class="layout">
-<aside class="sidebar">
-  <div class="sidebar-logo">A/B <span>Dashboard</span></div>
+<aside class="sidebar" role="complementary" aria-label="설정 패널">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;border-bottom:1px solid var(--border)">
+    <div class="sidebar-logo" style="padding-bottom:0;border-bottom:none">A/B <span>Dashboard</span></div>
+    <button id="theme-btn" onclick="toggleTheme()" title="라이트/다크 모드 전환" style="padding:4px 8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg3);color:var(--text3);font-size:11px;cursor:pointer;flex-shrink:0">☀</button>
+  </div>
   <div style="font-size:11px;color:var(--text2);line-height:1.5;margin-top:-8px;padding-bottom:12px;border-bottom:1px solid var(--border)">실험 결과를 <strong style="color:var(--text)">짧은 시간에 요약</strong>하고, 회의·문서에서 <strong style="color:var(--text)">말로 설명할 근거</strong>를 한곳에 모읍니다.</div>
 
   <div>
@@ -178,13 +184,9 @@ tr:last-child td{border-bottom:none}
     <div class="cfg">
       <div class="field"><label>Before (Control)</label><select id="cfg-before"></select></div>
       <div class="field"><label>After (Test)</label><select id="cfg-after"></select></div>
-      <div class="field"><label>1차 지표 · 신규 탭</label><select id="cfg-primary-nu" title="회의·문서에서 ‘이 숫자만 본다’고 말할 지표"></select></div>
-      <div class="field"><label>1차 지표 · 기존 탭</label><select id="cfg-primary-eu" title="기존 유저 탭에서 강조할 지표"></select></div>
       <div style="font-size:10px;color:var(--text3);line-height:1.55;margin-top:2px;padding:2px 2px 0">
-        1차 지표는 <strong style="color:var(--text2)">회의에서 먼저 보는 KPI</strong>입니다. PASS/CONDITIONAL/FAIL의 점수는
-        사내 정책 스코어(신규: Total LTV·IAA LTV·광고노출·Retention / 기존: Total ARPDAU·광고노출·플레이타임)로 계산됩니다.
+        판정은 사내 정책 스코어(신규: Total LTV·광고노출·Retention / 기존: Total ARPDAU·광고노출·플레이타임)로 계산됩니다. <strong style="color:var(--green)">양호</strong> 지표 카드는 초록, <strong style="color:var(--red)">부진</strong> 지표 카드는 빨강으로 자동 강조됩니다.
         <br>Version은 <strong style="color:var(--text2)">혼재가 크면</strong> 특정 릴리즈로 좁혀 해석하는 것을 권장합니다.
-        <br>권장: 1차 지표는 위 “정책 스코어에 포함되는 지표” 중 하나를 고르면, 카드 강조와 점수의 방향이 가장 자연스럽습니다.
       </div>
     </div>
   </div>
@@ -245,9 +247,9 @@ tr:last-child td{border-bottom:none}
   </div>
 </aside>
 
-<main class="main" id="main"></main>
+<main class="main" id="main" role="main" aria-label="분석 결과"></main>
 </div>
-<div class="exp-toast" id="exp-toast"></div>
+<div class="exp-toast" id="exp-toast" role="status" aria-live="polite"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>if(typeof Chart==='undefined'){var _s=document.createElement('script');_s.src='chart.umd.min.js';document.head.appendChild(_s);}</script>
@@ -585,7 +587,16 @@ function mkSeries(data,gk,B,A,vfn,trimVfn){
       const tbv=trimVfn(bR),tav=trimVfn(aR);
       if(tbv!=null&&tav!=null&&tbv!==0)trimLift=(tav-tbv)/Math.abs(tbv)*100;
     }
-    return{label,g,before:bv,after:av,diff,lift,stat,versions,wB,wA,wkey,trimLift};
+    // DAU 급변 감지: wB와 wA 중 하나가 전날 대비 30% 이상 변동
+    let dauShift=null;
+    if(wkey==='dau'&&(wB>0||wA>0)){
+      const totalW=wB+wA;
+      if(totalW>0){
+        const ratio_=Math.max(wB,wA)/Math.max(Math.min(wB,wA),1);
+        if(ratio_>=1.3)dauShift=((wA-wB)/Math.max(wB,1)*100);
+      }
+    }
+    return{label,g,before:bv,after:av,diff,lift,stat,versions,wB,wA,wkey,trimLift,dauShift};
   });
 }
 
@@ -1119,9 +1130,11 @@ function detailsHTML(cd,unit){
   </table></div>`;
 }
 
-function mcardHTML(title,series,cid,drillData,drillLabel,metricKey,isSub,seg='new',isPrimary=false){
+function mcardHTML(title,series,cid,drillData,drillLabel,metricKey,isSub,seg='new',judgeResult=null){
   const st=sstats(series),cd=series?.filter(d=>d.before!=null||d.after!=null)??[];
   const anom=anomaly(cd),lastStat=cd.length?cd[cd.length-1].stat:null;
+  // DAU 급변 구간 감지 (기존 유저 ARPDAU 왜곡 경고용)
+  const dauAnoPoints=cd.filter(d=>d.dauShift!=null&&Math.abs(d.dauShift)>=25);
   const lastLift=cd.length?cd[cd.length-1].lift:null;
   const wk=cd[0]?.wkey||(seg==='new'?'install':'dau');
   const wLbl=wk==='install'?'Σ install':'Σ DAU';
@@ -1138,10 +1151,13 @@ function mcardHTML(title,series,cid,drillData,drillLabel,metricKey,isSub,seg='ne
   const unit=METRIC_UNITS[metricKey]||'';
   // sub 카드: 살짝 들여쓰기, 배경 살짝 다르게
   const subStyle=isSub?'border-left:2px solid var(--border2);margin-left:8px;':'';
-  return`<div class="mc${anom?' anom':''}${isPrimary?' mc-primary':''}" style="${subStyle}">
+  return`<div class="mc${anom?' anom':''}" style="${subStyle}${
+    judgeResult==='good'?'border-color:var(--green-dim);box-shadow:0 0 0 1px var(--green-dim);background:linear-gradient(135deg,var(--bg2),rgba(62,207,142,.04));':
+    judgeResult==='poor'?'border-color:var(--red-dim);box-shadow:0 0 0 1px var(--red-dim);background:linear-gradient(135deg,var(--bg2),rgba(240,96,96,.04));':''
+  }">
     <div class="mc-hdr">
       <div class="mc-title" style="${isSub?'font-size:10px;':''}">
-        ${title}${isPrimary?'<span style="font-size:9px;padding:2px 7px;border-radius:10px;background:var(--blue-bg);color:var(--blue);margin-left:6px;font-weight:600;letter-spacing:.02em">1차 지표</span>':''}${anom?`<span style="font-size:11px;color:var(--amber)">▲</span>`:''}
+        ${title}${judgeResult==='good'?'<span style="font-size:9px;padding:2px 7px;border-radius:10px;background:var(--green-bg);color:var(--green);margin-left:6px;font-weight:600">양호</span>':judgeResult==='poor'?'<span style="font-size:9px;padding:2px 7px;border-radius:10px;background:var(--red-bg);color:var(--red);margin-left:6px;font-weight:600">부진</span>':''}${anom?`<span style="font-size:11px;color:var(--amber)">▲</span>`:''}
       </div>
       <div class="mc-right" style="display:flex;align-items:center;gap:6px">
         ${cd.length?`<button onclick="toggleDetails('${detailId}')" style="font-size:9px;color:var(--blue);background:none;border:1px solid var(--blue-dim);border-radius:4px;padding:1px 6px;cursor:pointer">상세</button>`:''}
@@ -1152,6 +1168,7 @@ function mcardHTML(title,series,cid,drillData,drillLabel,metricKey,isSub,seg='ne
     ${ciRow}
     ${st&&!isSub?`${cbar(st.cons)}<div class="avg-row">평균 lift <b style="color:var(--text)">${st.avg>=0?'+':''}${st.avg.toFixed(1)}%</b>${st.trimAvg!=null?` / 상위1%제외 <b style="color:${st.outlierSensitive?'var(--amber)':'var(--text2)'}">${st.trimAvg>=0?'+':''}${st.trimAvg.toFixed(1)}%</b>${st.outlierSensitive?` <span style="font-size:9px;padding:1px 5px;border-radius:8px;background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-dim)">⚠ 이상치 민감</span>`:''}`:''}  · 일관성 ${Math.round(st.cons*100)}%${st.pval!=null?` · <span style="color:${st.pval<0.05?'var(--green)':st.pval<0.10?'var(--amber)':'var(--text3)'}" title="One-sample t-test (H₀: mean lift=0). 코호트 간 독립 가정 근사.">p=${st.pval<0.001?'<.001':st.pval.toFixed(3)}</span>`:''}</div>`:''}
     ${st&&isSub?`<div class="avg-row" style="font-size:10px">평균 lift ${st.avg>=0?'+':''}${st.avg.toFixed(1)}%${st.outlierSensitive?` <span style="font-size:9px;padding:1px 4px;border-radius:8px;background:var(--amber-bg);color:var(--amber)">⚠ 이상치</span>`:''}  · 일관성 ${Math.round(st.cons*100)}%${st.pval!=null?` · <span style="color:${st.pval<0.05?'var(--green)':st.pval<0.10?'var(--amber)':'var(--text3)'}">p=${st.pval<0.001?'<.001':st.pval.toFixed(3)}</span>`:''}</div>`:''}
+    ${dauAnoPoints.length&&(metricKey==='total_arpdau'||metricKey==='iaa_arpdau'||metricKey==='iap_arpdau')?`<div style="font-size:10px;padding:4px 8px;border-radius:var(--radius);background:var(--amber-bg);border:1px solid var(--amber-dim);color:var(--amber);margin-bottom:6px;line-height:1.45">⚠ <strong>DAU 급변 구간 있음</strong> — ${dauAnoPoints.map(d=>`${d.label} DAU ${d.dauShift>=0?'+':''}${d.dauShift.toFixed(0)}%`).join(', ')}. ARPDAU가 DAU 변동으로 왜곡됐을 수 있습니다.</div>`:''}
     <div id="${detailId}" style="display:none;margin-bottom:8px">${cd.length?detailsHTML(cd,unit):''}</div>
     ${cd.length?`
     ${versionBarHTML(cd)}
@@ -1163,7 +1180,11 @@ function mcardHTML(title,series,cid,drillData,drillLabel,metricKey,isSub,seg='ne
     <div class="dl-sec">
       <div class="dl-lbl">구간별 격차 (A − B, %)</div>
       <div class="dl-row">${dailyLifts}</div>
-    </div>`:`<div class="empty" style="padding:18px 0;font-size:12px">파일 없음</div>`}
+    </div>`:`<div class="empty" style="padding:18px 0;font-size:12px;line-height:1.6">${
+      series&&series.length?
+        '<span style="color:var(--amber)">필터 결과 없음</span><br><span style="font-size:11px;color:var(--text3)">현재 OS·Country·Version 필터에 해당하는 데이터가 없습니다. 필터를 변경해 주세요.</span>':
+        '파일 없음'
+    }</div>`}
     ${drill}
   </div>`;
 }
@@ -1272,19 +1293,7 @@ function syncConfig(){
   bsel.innerHTML=asel.innerHTML=gs.map(g=>`<option value="${g}">${g}</option>`).join('');
   bsel.value=s.before;asel.value=s.after;
   document.getElementById('fchips').innerHTML=Object.keys(FL).map(k=>`<span class="${s.files[k]?'chip-ok':'chip-no'}">${FL[k]}</span>`).join('');
-  const pnu=document.getElementById('cfg-primary-nu'),peu=document.getElementById('cfg-primary-eu');
-  if(pnu){
-    const opts=[{k:'',l:'— 선택 안 함 —'},...CM_NU.map(x=>({k:x.k,l:x.l}))];
-    pnu.innerHTML=opts.map(o=>`<option value="${o.k}">${o.l}</option>`).join('');
-    if(!opts.some(o=>o.k===s.primaryNu))s.primaryNu='';
-    pnu.value=s.primaryNu||'';
-  }
-  if(peu){
-    const opts=[{k:'',l:'— 선택 안 함 —'},...CM_EU.map(x=>({k:x.k,l:x.l}))];
-    peu.innerHTML=opts.map(o=>`<option value="${o.k}">${o.l}</option>`).join('');
-    if(!opts.some(o=>o.k===s.primaryEu))s.primaryEu='';
-    peu.value=s.primaryEu||'';
-  }
+
   // 고급 설정 패널 값 동기화
   const cfg=s.cfg||{goodAvg:1,poorAvg:-2,goodCons:0.50,poorCons:0.25};
   const ga=document.getElementById('cfg-good-avg'),pa=document.getElementById('cfg-poor-avg');
@@ -1469,15 +1478,31 @@ const CM_EU=[
   {l:'ARPPU',           k:'arppu'},
 ];
 
+// 판정 judges key → metric key 변환
+const JUDGE_TO_METRIC_NU={ltv:'total_ltv',ad:'ad_imps',ret:'retention'};
+const JUDGE_TO_METRIC_EU={arpdau:'total_arpdau',ad:'ad_imps',play:'playtime'};
+
+// judgeMap: {metricKey: 'good'|'neutral'|'poor'} 형태로 변환
+function buildJudgeMap(judges, seg){
+  const map={};
+  if(!judges)return map;
+  const ref=seg==='new'?JUDGE_TO_METRIC_NU:JUDGE_TO_METRIC_EU;
+  Object.entries(judges).forEach(([jk,jv])=>{
+    const mk=ref[jk];
+    if(mk&&jv)map[mk]=jv;
+  });
+  return map;
+}
+
 // 그룹 카드: 대표 카드 + "세부 보기" 버튼 + 접힌 sub 카드들 (seg: new | existing → 가중 라벨)
-function mgroupHTML(g, data, prefix, idx, seg, primaryKey){
-  const mainCard=mcardHTML(g.t,data[g.k],`${prefix}${idx}`,g.drill?data[g.drill.dk]:null,g.drill?.lbl,g.k,false,seg,g.k===primaryKey);
+function mgroupHTML(g, data, prefix, idx, seg, judgeMap){
+  const mainCard=mcardHTML(g.t,data[g.k],`${prefix}${idx}`,g.drill?data[g.drill.dk]:null,g.drill?.lbl,g.k,false,seg,judgeMap?.[g.k]??null);
   if(!g.subs?.length)return mainCard;
   const subId=`sub-${seg}-${prefix}${idx}-${g.k}`;
   const validSubs=g.subs.filter(s=>data[s.k]?.some(d=>d.before!=null||d.after!=null));
   if(!validSubs.length)return mainCard;
   const subCards=validSubs.map((s,si)=>
-    mcardHTML(s.t,data[s.k],`${prefix}${idx}s${si}`,s.drill?data[s.drill.dk]:null,s.drill?.lbl,s.k,true,seg,s.k===primaryKey)
+    mcardHTML(s.t,data[s.k],`${prefix}${idx}s${si}`,s.drill?data[s.drill.dk]:null,s.drill?.lbl,s.k,true,seg,judgeMap?.[s.k]??null)
   ).join('');
   return`<div>
     ${mainCard}
@@ -1573,10 +1598,10 @@ function renderMain(){
   let tc='';
   if(activeSeg==='new'){
     tc=!Object.keys(nu).length?`<div class="empty" style="line-height:1.6">이 탭은 <strong style="color:var(--text)">신규 유저</strong> 지표용입니다.<br><span style="font-size:12px;color:var(--text2)">파일명에 <code style="font-size:11px;color:var(--blue)">new_user</code>가 들어간 CSV(예: new_user_ltv)를 올려 주세요.</span></div>`
-      :`${multipleComparisonWarnHTML(nu,NG)}<div class="mgrid">${NG.map((g,i)=>mgroupHTML(g,nu,'cn',i,'new',s.primaryNu||'')).join('')}</div>`;
+      :`${multipleComparisonWarnHTML(nu,NG)}<div class="mgrid">${NG.map((g,i)=>mgroupHTML(g,nu,'cn',i,'new',buildJudgeMap(vd.nu?.judges,'new'))).join('')}</div>`;
   } else if(activeSeg==='existing'){
     tc=!Object.keys(eu).length?`<div class="empty" style="line-height:1.6">이 탭은 <strong style="color:var(--text)">기존 유저</strong> 지표용입니다.<br><span style="font-size:12px;color:var(--text2)">파일명에 <code style="font-size:11px;color:var(--blue)">existing</code>가 들어간 CSV를 올려 주세요.</span></div>`
-      :`${multipleComparisonWarnHTML(eu,EG)}<div class="mgrid">${EG.map((g,i)=>mgroupHTML(g,eu,'ce',i,'existing',s.primaryEu||'')).join('')}</div>`;
+      :`${multipleComparisonWarnHTML(eu,EG)}<div class="mgrid">${EG.map((g,i)=>mgroupHTML(g,eu,'ce',i,'existing',buildJudgeMap(vd.eu?.judges,'existing'))).join('')}</div>`;
   } else if(activeSeg==='compare'&&canCmp){
     const valid=sessions.map((sx,i)=>allR[i]?{sx,r:allR[i]}:null).filter(Boolean);
     const vc=v=>v==='PASS'?'var(--green)':v==='FAIL'?'var(--red)':v==='CONDITIONAL'?'var(--amber)':'var(--text3)';
@@ -1672,7 +1697,7 @@ function renderMain(){
     ${versionMixWarnHTML(s.files)}
     <div style="font-size:11px;color:var(--text2);line-height:1.55;padding:0 2px 6px 2px;border-left:3px solid var(--blue-dim);padding-left:12px;margin-bottom:2px"><strong style="color:var(--text)">이 화면의 역할</strong> — 위 판정은 지표별 독립 판정을 종합한 <em>의사결정 보조</em>입니다. 지표가 많을수록 우연히 “좋아 보이는” 패턴이 늘어나니, 왼쪽 <strong style="color:var(--text)">1차 지표</strong>로 회의의 기준을 하나 정해 두세요. 탭에서 흐름을 본 뒤 기획·운영·데이터와 말을 맞추면 됩니다.</div>
     <div class="vrow">${vd.nu?vcardHTML(vd.nu,'신규 유저 판정','nu'):vcardHTML(null,'신규 유저 판정','nu')}${vd.eu?vcardHTML(vd.eu,'기존 유저 판정','eu'):vcardHTML(null,'기존 유저 판정','eu')}</div>
-    <div class="tabs">${tabs.map(t=>`<button class="tab${activeSeg===t.k?' on':''}" onclick="switchSeg('${t.k}')">${t.l}</button>`).join('')}</div>
+    <div class="tabs" role="tablist">${tabs.map(t=>`<button class="tab${activeSeg===t.k?' on':''}" role="tab" onclick="switchSeg('${t.k}')">${t.l}</button>`).join('')}</div>
     ${tc}`;
   requestAnimationFrame(()=>{
     if(typeof Chart==='undefined')return;
@@ -1701,8 +1726,6 @@ function renderMain(){
 // ── EVENT BINDINGS ──
 document.getElementById('cfg-before').addEventListener('change',e=>{getA().before=e.target.value;renderMain();});
 document.getElementById('cfg-after').addEventListener('change',e=>{getA().after=e.target.value;renderMain();});
-document.getElementById('cfg-primary-nu')?.addEventListener('change',e=>{getA().primaryNu=e.target.value;renderMain();});
-document.getElementById('cfg-primary-eu')?.addEventListener('change',e=>{getA().primaryEu=e.target.value;renderMain();});
 document.getElementById('fi-side').addEventListener('change',e=>loadFiles([...e.target.files]));
 
 // D7 데이터가 실제로 존재하는 마지막 install_date
@@ -1805,6 +1828,19 @@ function exportBarHTML(){
     </button>
   </div>`;
 }
+
+// ── THEME ──
+function toggleTheme(){
+  const isLight=document.body.classList.toggle('light');
+  document.getElementById('theme-btn').textContent=isLight?'🌙':'☀';
+  try{localStorage.setItem('ab_theme',isLight?'light':'dark');}catch(e){}
+}
+(function initTheme(){
+  try{
+    const t=localStorage.getItem('ab_theme');
+    if(t==='light'){document.body.classList.add('light');const btn=document.getElementById('theme-btn');if(btn)btn.textContent='🌙';}
+  }catch(e){}
+})();
 
 // ── INIT ──
 syncConfig();renderSessList();renderMain();bindDZ();
