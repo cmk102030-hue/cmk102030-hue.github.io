@@ -196,8 +196,8 @@ tr:last-child td{border-bottom:none}
     <div class="fchips" id="fchips"></div>
     <label class="uplbl">
       <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v9M5 4l3-3 3 3M2 13h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      CSV 파일 추가
-      <input type="file" multiple accept=".csv" id="fi-side" style="display:none">
+      CSV / ZIP 파일 추가
+      <input type="file" multiple accept=".csv,.zip" id="fi-side" style="display:none">
     </label>
   </div>
 
@@ -250,9 +250,11 @@ tr:last-child td{border-bottom:none}
 <main class="main" id="main" role="main" aria-label="분석 결과"></main>
 </div>
 <div class="exp-toast" id="exp-toast" role="status" aria-live="polite"></div>
+<input type="file" multiple accept=".csv,.zip" id="fi-dz" style="display:none">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>if(typeof Chart==='undefined'){var _s=document.createElement('script');_s.src='chart.umd.min.js';document.head.appendChild(_s);}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 // ── FILE TYPE MAP ──
 const FL={new_ltv:'New LTV',new_eng:'New Engagement',new_iaa:'New IAA',new_iap:'New IAP',new_iaa_p:'New IAA Place',new_iap_p:'New IAP Prod',ex_ltv:'Ex LTV',ex_eng:'Ex Engagement',ex_iaa:'Ex IAA',ex_iap:'Ex IAP',ex_iaa_p:'Ex IAA Place',ex_iap_p:'Ex IAP Prod'};
@@ -754,8 +756,9 @@ function sstats(series){
 }
 // metricJudge: 지표 독립 판정 — avg와 cons만으로 판단
 // 임계값은 세션 cfg에서 가져옴 (없으면 기본값)
+let _thresholdCtx=null; // getSessionResults에서 세션별 cfg를 주입
 function getThresholds(){
-  const s=typeof getA==='function'?getA():null;
+  const s=_thresholdCtx||getA();
   return{
     goodAvg:  s?.cfg?.goodAvg  ?? 1,
     poorAvg:  s?.cfg?.poorAvg  ?? -2,
@@ -835,7 +838,7 @@ function verdict(nu,eu){
 }
 
 // ── STATE ──
-let sessions=[{id:1,name:'Test A',files:{},viewMode:'all',before:'',after:'',osF:'AOS',ctryF:'ALL',vF:'ALL',primaryNu:'',primaryEu:'',cfg:{goodAvg:1,poorAvg:-2,goodCons:0.50,poorCons:0.25}}];
+let sessions=[{id:1,name:'Test A',files:{},viewMode:'all',before:'',after:'',osF:'AOS',ctryF:'ALL',vF:'ALL',primaryNu:'',primaryEu:'',cfg:{goodAvg:1,poorAvg:-2,goodCons:0.50,poorCons:0.25},_filesVer:0}];
 let activeId=1,activeSeg='new',editingId=null;
 let charts={};
 let plUidSeq=1;
@@ -848,11 +851,38 @@ const getA=()=>{
     if(!('primaryNu' in s))s.primaryNu='';
     if(!('primaryEu' in s))s.primaryEu='';
     if(!s.cfg)s.cfg={goodAvg:1,poorAvg:-2,goodCons:0.50,poorCons:0.25};
+    if(!('_filesVer' in s))s._filesVer=0;
   }
   return s;
 };
 const getGroups=s=>{const all=new Set();Object.values(s.files).forEach(d=>d.forEach(r=>{if(r.ab_config)all.add(r.ab_config);}));return[...all];};
-const killCharts=()=>{if(typeof Chart==='undefined'){charts={};return;}Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}});charts={};};
+const killCharts=()=>{
+  if(_chartObserver){try{_chartObserver.disconnect();}catch(e){}_chartObserver=null;}
+  if(typeof Chart==='undefined'){charts={};return;}
+  Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}});charts={};
+};
+let _chartObserver=null;
+
+// ── ANALYSIS CACHE ──
+// 세션별 분석 결과를 캐시. 파일·필터·설정이 같으면 재계산 안 함.
+function _sessCacheKey(s){
+  const t=s.cfg||{};// 세션 자신의 cfg를 사용 (getA()는 다른 세션 참조 가능)
+  return`${s.viewMode}|${s.before}|${s.after}|${s.osF}|${s.ctryF}|${s.vF}|${s._filesVer||0}|${t.goodAvg}|${t.poorAvg}|${t.goodCons}|${t.poorCons}`;
+}
+function getSessionResults(s){
+  if(!s||!Object.keys(s.files).length||!s.before||!s.after)return null;
+  const key=_sessCacheKey(s);
+  if(s._cache&&s._cacheKey===key)return s._cache;
+  const nu=analyzeNew(s.files,s.viewMode||'all',s.before,s.after,s.osF,s.ctryF,s.vF);
+  const eu=analyzeEx(s.files,s.viewMode||'all',s.before,s.after,s.osF,s.ctryF,s.vF);
+  _thresholdCtx=s; // 이 세션의 cfg로 판정
+  const vd=verdict(nu,eu);
+  _thresholdCtx=null;
+  const srm=computeSRM(s.files,s.viewMode||'all',s.before,s.after,s.osF,s.ctryF,s.vF);
+  s._cache={nu,eu,vd,srm};
+  s._cacheKey=key;
+  return s._cache;
+};
 
 // ── HTML ATOMS ──
 function lb(v,size=11){if(v==null)return`<span style="color:var(--text3);font-size:${size}px">—</span>`;const cls=v>0?'lp':v<0?'ln':'lz';return`<span class="lb ${cls}" style="font-size:${size}px">${v>=0?'+':''}${v.toFixed(1)}%</span>`;}
@@ -1252,9 +1282,9 @@ function setVer(v){const s=getA();s.vF=v;renderMain();}
 function renderSessList(){
   const el=document.getElementById('sess-list');if(!el)return;
   el.innerHTML=sessions.map(s=>{
-    const hasF=Object.keys(s.files).length>0&&s.before&&s.after;
     let dot='#555a6e';
-    if(hasF){const nu=analyzeNew(s.files,s.viewMode||'all',s.before,s.after,s.osF,s.ctryF,s.vF),eu=analyzeEx(s.files,s.viewMode||'all',s.before,s.after,s.osF,s.ctryF,s.vF),vd=verdict(nu,eu);const v=vd.nu?.v;dot=v==='PASS'?'#3ecf8e':v==='FAIL'?'#f06060':v==='CONDITIONAL'?'#f0a030':'#555a6e';}
+    const r=getSessionResults(s);
+    if(r){const v=r.vd.nu?.v;dot=v==='PASS'?'#3ecf8e':v==='FAIL'?'#f06060':v==='CONDITIONAL'?'#f0a030':'#555a6e';}
     const isAct=s.id===activeId;
     if(editingId===s.id){
       return`<div class="sess-row${isAct?' active':''}">
@@ -1278,10 +1308,10 @@ function renderSessList(){
 function startEdit(id){editingId=id;if(activeId!==id){activeId=id;syncConfig();}renderSessList();}
 function commitName(id,val){const s=sessions.find(x=>x.id===id);if(s){s.name=val.trim()||s.name;}editingId=null;renderSessList();renderMain();}
 function cancelEdit(){editingId=null;renderSessList();}
-function selectSess(id){editingId=null;activeId=id;syncConfig();renderSessList();renderMain();}
+function selectSess(id){editingId=null;activeId=id;_lastAnalysis=null;syncConfig();renderSessList();renderMain();}
 function addSession(){
   const newId=Math.max(...sessions.map(s=>s.id))+1;
-  sessions.push({id:newId,name:`Test ${String.fromCharCode(64+newId)}`,files:{},viewMode:'all',before:'',after:'',osF:'AOS',ctryF:'ALL',vF:'ALL',primaryNu:'',primaryEu:'',cfg:{goodAvg:1,poorAvg:-2,goodCons:0.50,poorCons:0.25}});
+  sessions.push({id:newId,name:`Test ${String.fromCharCode(64+newId)}`,files:{},viewMode:'all',before:'',after:'',osF:'AOS',ctryF:'ALL',vF:'ALL',primaryNu:'',primaryEu:'',cfg:{goodAvg:1,poorAvg:-2,goodCons:0.50,poorCons:0.25},_filesVer:0});
   activeId=newId;editingId=null;syncConfig();renderSessList();renderMain();
 }
 function delSess(id){if(sessions.length===1)return;sessions=sessions.filter(s=>s.id!==id);if(activeId===id)activeId=sessions[0].id;editingId=null;syncConfig();renderSessList();renderMain();}
@@ -1524,7 +1554,30 @@ function toggleSubs(id,btn){
 
 function setOS(v){const s=getA();s.osF=v;renderMain();}
 function setCtry(v){if(!v)return;const s=getA();s.ctryF=v;renderMain();}
-function switchSeg(t){activeSeg=t;renderMain();}
+
+// ── 탭 전환 최적화 ──
+// 탭 전환 시 shell(필터바·판정·배너)은 유지하고 탭 콘텐츠+차트만 교체
+let _lastAnalysis=null; // {nu, eu, vd, srm, allR} — 현재 세션의 마지막 분석 결과
+function switchSeg(t){
+  if(activeSeg===t)return;
+  activeSeg=t;
+  // fast path: shell이 이미 렌더됐고 분석 결과가 있으면 탭 콘텐츠만 교체
+  const tabDiv=document.getElementById('tab-content');
+  const tabBar=document.querySelector('.tabs');
+  if(tabDiv&&tabBar&&_lastAnalysis){
+    killCharts();
+    plUidSeq=1;
+    // 탭 버튼 활성 상태 업데이트
+    tabBar.querySelectorAll('.tab').forEach(btn=>{
+      btn.classList.toggle('on',btn.getAttribute('data-seg')===t);
+    });
+    // 탭 콘텐츠만 재생성
+    tabDiv.innerHTML=_buildTabContent(_lastAnalysis);
+    _initTabCharts(_lastAnalysis);
+    return;
+  }
+  renderMain();
+}
 
 function versionMixWarnHTML(files){
   const vers=getAvailVersions(files);
@@ -1568,33 +1621,57 @@ function multipleComparisonWarnHTML(data,metricGroups){
 }
 
 // ── MAIN RENDER ──
+let _renderTimer=null;
 function renderMain(){
+  // 디바운스: 한 프레임 안에 여러 번 호출되면 마지막만 실행
+  if(_renderTimer)cancelAnimationFrame(_renderTimer);
+  _renderTimer=requestAnimationFrame(_renderMainImpl);
+}
+function _renderMainImpl(){
+  _renderTimer=null;
   killCharts();
   plUidSeq=1;
   const s=getA(),main=document.getElementById('main'),hasF=Object.keys(s.files).length>0;
   if(!hasF){
     main.innerHTML=`<div class="dz" id="dz">
       <div style="font-size:20px;margin-bottom:10px">↑</div>
-      <div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:5px">CSV 파일을 드래그하거나 클릭</div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.55;max-width:420px;margin:0 auto">KPI 뽑은 그대로 올리면 됩니다. 파일명에 <span style="color:var(--text)">new_user / existing_user</span>만 들어가면 종류를 자동으로 맞춥니다. 여러 개 한 번에 업로드 가능</div>
+      <div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:5px">CSV 또는 ZIP 파일을 드래그하거나 클릭</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.55;max-width:420px;margin:0 auto">KPI 뽑은 그대로 올리면 됩니다. 파일명에 <span style="color:var(--text)">new_user / existing_user</span>만 들어가면 종류를 자동으로 맞춥니다. <strong style="color:var(--text)">ZIP은 자동으로 풀어서</strong> 안의 CSV를 읽습니다.</div>
       <div class="dz-chips"><span class="dz-chip">new_user_ltv</span><span class="dz-chip">new_user_engagement</span><span class="dz-chip">new_user_iaa</span><span class="dz-chip">new_user_iap</span><span class="dz-chip">existing_user_ltv</span><span class="dz-chip">existing_user_iaa</span></div>
-      <input type="file" multiple accept=".csv" id="fi-dz" style="display:none">
     </div>`;
     bindDZ();return;
   }
-  const nu=analyzeNew(s.files,s.viewMode||'all',s.before,s.after,s.osF,s.ctryF,s.vF);
-  const eu=analyzeEx(s.files,s.viewMode||'all',s.before,s.after,s.osF,s.ctryF,s.vF);
-  const vd=verdict(nu,eu);
-  const srm=s.before&&s.after?computeSRM(s.files,s.viewMode||'all',s.before,s.after,s.osF,s.ctryF,s.vF):null;
+  const _r=getSessionResults(s);
+  const nu=_r?_r.nu:{};
+  const eu=_r?_r.eu:{};
+  const vd=_r?_r.vd:{};
+  const srm=_r?_r.srm:null;
   const hasFilters=Object.keys(s.files).length>0;
   const chartMiss=typeof Chart==='undefined'?`<div class="chart-miss"><strong>Chart.js를 불러오지 못했습니다.</strong> 인터넷 연결을 확인하거나, 오프라인 사용 시 <code>chart.umd.min.js</code>를 같은 폴더에 두세요.</div>`:'';
-  const allR=sessions.map(sx=>{
-    if(!Object.keys(sx.files).length||!sx.before||!sx.after)return null;
-    const snu=analyzeNew(sx.files,sx.viewMode||'all',sx.before,sx.after,sx.osF,sx.ctryF,sx.vF),seu=analyzeEx(sx.files,sx.viewMode||'all',sx.before,sx.after,sx.osF,sx.ctryF,sx.vF);
-    return{nu:snu,eu:seu,vd:verdict(snu,seu)};
-  });
+  const allR=sessions.map(sx=>getSessionResults(sx));
   const canCmp=allR.filter(Boolean).length>=2;
   const tabs=[{k:'new',l:'신규 유저'},{k:'existing',l:'기존 유저'},...(canCmp?[{k:'compare',l:`비교 (${allR.filter(Boolean).length})`}]:[])];
+  // 분석 결과를 저장 — switchSeg fast path에서 사용
+  _lastAnalysis={nu,eu,vd,srm,allR};
+  const tc=_buildTabContent(_lastAnalysis);
+  main.innerHTML=`
+    ${chartMiss}
+    ${fbarHTML(s)}
+    ${exportBarHTML()}
+    ${srmBannerHtml(srm)}
+    ${versionMixWarnHTML(s.files)}
+    <div style="font-size:11px;color:var(--text2);line-height:1.55;padding:0 2px 6px 2px;border-left:3px solid var(--blue-dim);padding-left:12px;margin-bottom:2px"><strong style="color:var(--text)">이 화면의 역할</strong> — 위 판정은 지표별 독립 판정을 종합한 <em>의사결정 보조</em>입니다. 지표가 많을수록 우연히 "좋아 보이는" 패턴이 늘어나니, 왼쪽 <strong style="color:var(--text)">1차 지표</strong>로 회의의 기준을 하나 정해 두세요. 탭에서 흐름을 본 뒤 기획·운영·데이터와 말을 맞추면 됩니다.</div>
+    <div class="vrow">${vd.nu?vcardHTML(vd.nu,'신규 유저 판정','nu'):vcardHTML(null,'신규 유저 판정','nu')}${vd.eu?vcardHTML(vd.eu,'기존 유저 판정','eu'):vcardHTML(null,'기존 유저 판정','eu')}</div>
+    <div class="tabs" role="tablist">${tabs.map(t=>`<button class="tab${activeSeg===t.k?' on':''}" role="tab" data-seg="${t.k}" onclick="switchSeg('${t.k}')">${t.l}</button>`).join('')}</div>
+    <div id="tab-content">${tc}</div>`;
+  _initTabCharts(_lastAnalysis);
+}
+
+
+// ── 탭 콘텐츠 빌더 (renderMain + switchSeg 공용) ──
+function _buildTabContent(a){
+  const{nu,eu,vd,allR}=a;
+  const canCmp=allR.filter(Boolean).length>=2;
   let tc='';
   if(activeSeg==='new'){
     tc=!Object.keys(nu).length?`<div class="empty" style="line-height:1.6">이 탭은 <strong style="color:var(--text)">신규 유저</strong> 지표용입니다.<br><span style="font-size:12px;color:var(--text2)">파일명에 <code style="font-size:11px;color:var(--blue)">new_user</code>가 들어간 CSV(예: new_user_ltv)를 올려 주세요.</span></div>`
@@ -1611,12 +1688,10 @@ function renderMain(){
         ${r.vd.nu?`<span style="padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:var(--bg3);color:${vc(r.vd.nu.v)}">신규 ${r.vd.nu.v}</span>`:''}
         ${r.vd.eu?`<span style="padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:var(--bg3);color:${vc(r.vd.eu.v)}">기존 ${r.vd.eu.v}</span>`:''}
       </div></div>`).join('');
-    // ── 비교 테이블: 승자 표시 + 셀 밀도 축소 + 요약 ──
     const mkCmpTable=(cms,seg)=>{
       const hasAny=valid.some(({r})=>r[seg]&&Object.keys(r[seg]).length);
       if(!hasAny)return'';
       const lbl=seg==='nu'?'신규 유저':'기존 유저';
-      // 지표별 stats + 승자 판정
       const metricData=cms.map(({l,k})=>{
         const stats=valid.map(({r,sx})=>({st:sstats(r[seg]?.[k]),name:sx.name}));
         let bestIdx=-1,bestAvg=-Infinity;
@@ -1626,19 +1701,15 @@ function renderMain(){
         const isTie=spread<1;
         return{l,k,stats,bestIdx:isTie?-1:bestIdx,isTie};
       });
-      // 요약: 테스트별 우위 지표 수
       const winCounts=valid.map((_,i)=>metricData.filter(m=>m.bestIdx===i).length);
       const totalM=metricData.filter(m=>m.stats.some(s=>s.st!=null)).length;
       const tieCount=metricData.filter(m=>m.isTie&&m.stats.some(s=>s.st!=null)).length;
-      // 승자 결정: 우위 지표 수 최다
       const maxWin=Math.max(...winCounts);
       const leadIdx=winCounts.filter(w=>w===maxWin).length===1?winCounts.indexOf(maxWin):-1;
-      // 강화된 결론 패널
       let sumHTML='';
       if(totalM>0){
         const leadName=leadIdx>=0?valid[leadIdx].sx.name:null;
         const leadCount=leadIdx>=0?winCounts[leadIdx]:0;
-        // 메인 결론 한 줄
         let headline='';
         if(leadIdx>=0&&leadCount>=totalM*0.6){
           headline=`<span style="color:var(--green)">${leadName}</span>이 <strong>${totalM}개 중 ${leadCount}개</strong> 지표에서 우위`;
@@ -1647,7 +1718,6 @@ function renderMain(){
         } else {
           headline='두 테스트 간 뚜렷한 차이 없음 — 추가 관찰 필요';
         }
-        // 테스트별 바 차트
         const barMax=Math.max(...winCounts,1);
         const bars=valid.map(({sx},i)=>{
           const w=winCounts[i];const pct=Math.round(w/barMax*100);
@@ -1689,39 +1759,55 @@ function renderMain(){
       ${mkCmpTable(CM_NU,'nu')}
       ${mkCmpTable(CM_EU,'eu')}`;
   }
-  main.innerHTML=`
-    ${chartMiss}
-    ${fbarHTML(s)}
-    ${exportBarHTML()}
-    ${srmBannerHtml(srm)}
-    ${versionMixWarnHTML(s.files)}
-    <div style="font-size:11px;color:var(--text2);line-height:1.55;padding:0 2px 6px 2px;border-left:3px solid var(--blue-dim);padding-left:12px;margin-bottom:2px"><strong style="color:var(--text)">이 화면의 역할</strong> — 위 판정은 지표별 독립 판정을 종합한 <em>의사결정 보조</em>입니다. 지표가 많을수록 우연히 “좋아 보이는” 패턴이 늘어나니, 왼쪽 <strong style="color:var(--text)">1차 지표</strong>로 회의의 기준을 하나 정해 두세요. 탭에서 흐름을 본 뒤 기획·운영·데이터와 말을 맞추면 됩니다.</div>
-    <div class="vrow">${vd.nu?vcardHTML(vd.nu,'신규 유저 판정','nu'):vcardHTML(null,'신규 유저 판정','nu')}${vd.eu?vcardHTML(vd.eu,'기존 유저 판정','eu'):vcardHTML(null,'기존 유저 판정','eu')}</div>
-    <div class="tabs" role="tablist">${tabs.map(t=>`<button class="tab${activeSeg===t.k?' on':''}" role="tab" onclick="switchSeg('${t.k}')">${t.l}</button>`).join('')}</div>
-    ${tc}`;
+  return tc;
+}
+
+// ── 탭 차트 lazy init (renderMain + switchSeg 공용) ──
+function _initTabCharts(a){
   requestAnimationFrame(()=>{
     if(typeof Chart==='undefined')return;
+    const{nu,eu}=a;
+    const pending=[];
     if(activeSeg==='new'){
       NG.forEach((g,i)=>{
         const cd=nu[g.k]?.filter(d=>d.before!=null||d.after!=null)??[];
-        if(cd.length)initChart(`cn${i}`,cd);
+        if(cd.length)pending.push({cid:`cn${i}`,cd});
         g.subs?.forEach((s,si)=>{
           const scd=nu[s.k]?.filter(d=>d.before!=null||d.after!=null)??[];
-          if(scd.length)initChart(`cn${i}s${si}`,scd);
+          if(scd.length)pending.push({cid:`cn${i}s${si}`,cd:scd});
         });
       });
     } else if(activeSeg==='existing'){
       EG.forEach((g,i)=>{
         const cd=eu[g.k]?.filter(d=>d.before!=null||d.after!=null)??[];
-        if(cd.length)initChart(`ce${i}`,cd);
+        if(cd.length)pending.push({cid:`ce${i}`,cd});
         g.subs?.forEach((s,si)=>{
           const scd=eu[s.k]?.filter(d=>d.before!=null||d.after!=null)??[];
-          if(scd.length)initChart(`ce${i}s${si}`,scd);
+          if(scd.length)pending.push({cid:`ce${i}s${si}`,cd:scd});
         });
       });
     }
+    if(!pending.length)return;
+    if('IntersectionObserver' in window){
+      _chartObserver=new IntersectionObserver((entries,observer)=>{
+        entries.forEach(e=>{
+          if(!e.isIntersecting)return;
+          const cid=e.target.id;
+          const p=pending.find(x=>x.cid===cid);
+          if(p&&!charts[cid]){initChart(cid,p.cd);}
+          observer.unobserve(e.target);
+        });
+      },{rootMargin:'200px'});
+      pending.forEach(({cid})=>{
+        const el=document.getElementById(cid);
+        if(el)_chartObserver.observe(el);
+      });
+    } else {
+      pending.forEach(({cid,cd})=>initChart(cid,cd));
+    }
   });
 }
+
 
 // ── EVENT BINDINGS ──
 document.getElementById('cfg-before').addEventListener('change',e=>{getA().before=e.target.value;renderMain();});
@@ -1750,9 +1836,42 @@ function calcRecommendedCutoff(files){
   return '';
 }
 
+// ZIP → CSV 추출 헬퍼
+async function extractCSVsFromZip(zipFile){
+  if(typeof JSZip==='undefined'){showToast('ZIP 지원 라이브러리를 불러오지 못했습니다');return[];}
+  try{
+    const zip=await JSZip.loadAsync(zipFile);
+    const csvFiles=[];
+    const entries=Object.entries(zip.files).filter(([name,f])=>!f.dir&&name.toLowerCase().endsWith('.csv')&&!name.startsWith('__MACOSX'));
+    for(const [name,f] of entries){
+      const text=await f.async('text');
+      const basename=name.split('/').pop();
+      csvFiles.push({name:basename,_text:text});
+    }
+    if(csvFiles.length)showToast(`ZIP에서 CSV ${csvFiles.length}개 추출됨`);
+    return csvFiles;
+  }catch(e){console.warn('ZIP 해제 실패:',e);showToast('ZIP 파일 해제에 실패했습니다');return[];}
+}
+
 async function loadFiles(fl){
   const s=getA();
-  for(const f of fl){const t=detectType(f.name);if(!t)continue;s.files[t]=parseCSV(await f.text());}
+  // ZIP 파일이면 내부 CSV 추출, 아니면 그대로
+  const allFiles=[];
+  for(const f of fl){
+    if(f.name.toLowerCase().endsWith('.zip')){
+      const csvs=await extractCSVsFromZip(f);
+      if(!csvs.length)showToast('ZIP 안에 CSV 파일이 없습니다');
+      allFiles.push(...csvs);
+    }else{
+      allFiles.push(f);
+    }
+  }
+  for(const f of allFiles){
+    const t=detectType(f.name);if(!t)continue;
+    const text=f._text!=null?f._text:await f.text();
+    s.files[t]=parseCSV(text);
+  }
+  s._filesVer=(s._filesVer||0)+1; // 캐시 무효화
   const gs=getGroups(s);
   if((!s.before||!s.after)&&gs.length>=2){
     const ci=gs.findIndex(g=>g.toUpperCase().includes('ON_0')||g.toLowerCase().includes('control'));
@@ -1771,7 +1890,7 @@ function bindDZ(){
   dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
   dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');loadFiles([...e.dataTransfer.files]);});
   dz.addEventListener('click',()=>document.getElementById('fi-dz')?.click());
-  const fi=document.getElementById('fi-dz');if(fi)fi.addEventListener('change',e=>loadFiles([...e.target.files]));
+  // change 이벤트는 전역 fi-dz에서 처리 (INIT에서 1회 바인딩)
 }
 document.addEventListener('dragover',e=>{if(Object.keys(getA().files).length)e.preventDefault();});
 document.addEventListener('drop',e=>{if(Object.keys(getA().files).length){e.preventDefault();loadFiles([...e.dataTransfer.files]);}});
@@ -1784,9 +1903,8 @@ function showToast(msg){
 }
 function exportSummaryText(){
   const s=getA();if(!Object.keys(s.files).length)return;
-  const nu=analyzeNew(s.files,s.viewMode||'all',s.before,s.after,s.osF,s.ctryF,s.vF);
-  const eu=analyzeEx(s.files,s.viewMode||'all',s.before,s.after,s.osF,s.ctryF,s.vF);
-  const vd=verdict(nu,eu);
+  const _r=getSessionResults(s);
+  const vd=_r?_r.vd:{};
   const lines=[`[A/B 테스트 요약] ${s.name}`,`Before: ${s.before} / After: ${s.after}`,`필터: OS=${s.osF}, Country=${s.ctryF}, Version=${s.vF}, View=${s.viewMode}`,``];
   if(vd.nu){
     const j=vd.nu.judges;
@@ -1843,7 +1961,12 @@ function toggleTheme(){
 })();
 
 // ── INIT ──
-syncConfig();renderSessList();renderMain();bindDZ();
+syncConfig();renderSessList();renderMain();
+// fi-dz는 전역 DOM에 있으므로 최초 1회만 바인딩
+(function(){
+  const fi=document.getElementById('fi-dz');
+  if(fi)fi.addEventListener('change',e=>{const files=[...e.target.files];e.target.value='';if(files.length)loadFiles(files);});
+})();
 </script>
 </body>
 </html>
