@@ -4,830 +4,188 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>송파구 월세 매물 브라우저</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap');
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #0f1117;
-  color: #e4e4e7;
-  height: 100vh;
-  overflow: hidden;
-}
-
-/* ── Layout ── */
-.app {
-  display: grid;
-  grid-template-rows: 56px 1fr 280px;
-  height: 100vh;
-}
-
-/* ── Header ── */
-.header {
-  background: #16171e;
-  border-bottom: 1px solid #2a2b35;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-}
-.header h1 {
-  font-size: 16px;
-  font-weight: 700;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.header h1 span { font-size: 20px; }
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.badge {
-  background: #2563eb;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 100px;
-}
-.btn-fetch {
-  background: #2563eb;
-  color: #fff;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-  font-family: inherit;
-}
-.btn-fetch:hover { background: #1d4ed8; }
-.btn-fetch:disabled { background: #3b3c4a; color: #71727e; cursor: not-allowed; }
-
-/* ── Map + Filter area ── */
-.map-area {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  overflow: hidden;
-}
-
-/* ── Filter Panel ── */
-.filter-panel {
-  background: #16171e;
-  border-right: 1px solid #2a2b35;
-  padding: 16px;
-  overflow-y: auto;
-}
-.filter-section {
-  margin-bottom: 16px;
-}
-.filter-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: #8b8c99;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 8px;
-}
-.checkbox-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.checkbox-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  color: #c4c4cc;
-}
-.checkbox-item input[type="checkbox"] {
-  accent-color: #2563eb;
-  width: 16px;
-  height: 16px;
-}
-.type-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-}
-.dot-apt { background: #3b82f6; }
-.dot-opst { background: #f59e0b; }
-.dot-villa { background: #22c55e; }
-.dot-jgc { background: #ef4444; }
-.dot-pre { background: #a855f7; }
-.dot-abyg { background: #06b6d4; }
-
-.range-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 6px;
-}
-.range-input {
-  width: 100%;
-  background: #1e1f2a;
-  border: 1px solid #2a2b35;
-  color: #e4e4e7;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-family: inherit;
-}
-.range-input::placeholder { color: #4a4b5a; }
-.range-input:focus { outline: none; border-color: #2563eb; }
-
-.toggle-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 0;
-}
-.toggle-row label {
-  font-size: 13px;
-  color: #c4c4cc;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.toggle-switch {
-  position: relative;
-  width: 40px;
-  height: 22px;
-}
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-.toggle-slider {
-  position: absolute;
-  inset: 0;
-  background: #2a2b35;
-  border-radius: 11px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.toggle-slider::before {
-  content: '';
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #fff;
-  top: 3px;
-  left: 3px;
-  transition: transform 0.2s;
-}
-.toggle-switch input:checked + .toggle-slider { background: #2563eb; }
-.toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); }
-
-.filter-divider {
-  border: none;
-  border-top: 1px solid #2a2b35;
-  margin: 12px 0;
-}
-
-/* ── Map ── */
-#map {
-  width: 100%;
-  height: 100%;
-}
-
-/* ── Bottom Table ── */
-.table-area {
-  background: #16171e;
-  border-top: 1px solid #2a2b35;
-  display: flex;
-  flex-direction: column;
-}
-.table-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  border-bottom: 1px solid #2a2b35;
-}
-.table-header h3 {
-  font-size: 13px;
-  font-weight: 600;
-  color: #8b8c99;
-}
-.sort-select {
-  background: #1e1f2a;
-  border: 1px solid #2a2b35;
-  color: #c4c4cc;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-family: inherit;
-}
-.table-scroll {
-  overflow-y: auto;
-  flex: 1;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-}
-thead th {
-  position: sticky;
-  top: 0;
-  background: #1a1b24;
-  color: #8b8c99;
-  font-weight: 600;
-  text-align: left;
-  padding: 8px 12px;
-  border-bottom: 1px solid #2a2b35;
-  white-space: nowrap;
-}
-tbody tr {
-  cursor: pointer;
-  transition: background 0.15s;
-}
-tbody tr:hover { background: #1e1f2a; }
-tbody td {
-  padding: 8px 12px;
-  border-bottom: 1px solid #1e1f2a;
-  white-space: nowrap;
-  color: #c4c4cc;
-}
-.type-badge {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-weight: 500;
-}
-.type-badge-apt { background: rgba(59,130,246,0.15); color: #60a5fa; }
-.type-badge-opst { background: rgba(245,158,11,0.15); color: #fbbf24; }
-.type-badge-villa { background: rgba(34,197,94,0.15); color: #4ade80; }
-.type-badge-jgc { background: rgba(239,68,68,0.15); color: #f87171; }
-.type-badge-pre { background: rgba(168,85,247,0.15); color: #c084fc; }
-.type-badge-abyg { background: rgba(6,182,212,0.15); color: #22d3ee; }
-
-.link-naver {
-  color: #60a5fa;
-  text-decoration: none;
-  font-size: 11px;
-}
-.link-naver:hover { text-decoration: underline; }
-
-.empty-msg {
-  text-align: center;
-  padding: 40px;
-  color: #4a4b5a;
-  font-size: 13px;
-}
-
-/* ── Loading overlay ── */
-.loading-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(15,17,23,0.8);
-  z-index: 9999;
-  justify-content: center;
-  align-items: center;
-}
-.loading-overlay.active { display: flex; }
-.loading-box {
-  background: #16171e;
-  border: 1px solid #2a2b35;
-  border-radius: 12px;
-  padding: 32px 40px;
-  text-align: center;
-}
-.spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid #2a2b35;
-  border-top-color: #2563eb;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin: 0 auto 12px;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading-text { font-size: 14px; color: #8b8c99; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;background:#0f1117;color:#e4e4e7;height:100vh;overflow:hidden}
+.app{display:grid;grid-template-rows:56px 1fr 260px;height:100vh}
+.header{background:#16171e;border-bottom:1px solid #2a2b35;display:flex;align-items:center;justify-content:space-between;padding:0 20px}
+.header h1{font-size:16px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px}
+.header h1 span{font-size:20px}
+.header-right{display:flex;align-items:center;gap:12px}
+.badge{background:#2563eb;color:#fff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:100px}
+.btn{background:#2563eb;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s;font-family:inherit}
+.btn:hover{background:#1d4ed8}
+.btn-s{background:#2a2b35;color:#c4c4cc}.btn-s:hover{background:#3b3c4a}
+.map-area{display:grid;grid-template-columns:260px 1fr;overflow:hidden}
+.fp{background:#16171e;border-right:1px solid #2a2b35;padding:14px;overflow-y:auto}
+.fs{margin-bottom:14px}
+.fl{font-size:11px;font-weight:600;color:#8b8c99;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.cg{display:flex;flex-direction:column;gap:4px}
+.ci{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#c4c4cc}
+.ci input[type=checkbox]{accent-color:#2563eb;width:15px;height:15px}
+.td{width:8px;height:8px;border-radius:50%;display:inline-block}
+.d1{background:#3b82f6}.d2{background:#f59e0b}.d3{background:#22c55e}.d4{background:#ef4444}.d5{background:#a855f7}.d6{background:#06b6d4}
+.rr{display:flex;align-items:center;gap:6px;margin-top:4px}
+.ri{width:100%;background:#1e1f2a;border:1px solid #2a2b35;color:#e4e4e7;padding:5px 8px;border-radius:6px;font-size:12px;font-family:inherit}
+.ri::placeholder{color:#4a4b5a}.ri:focus{outline:none;border-color:#2563eb}
+.tr{display:flex;align-items:center;justify-content:space-between;padding:4px 0}
+.tr label{font-size:13px;color:#c4c4cc}
+.ts{position:relative;width:38px;height:20px}
+.ts input{opacity:0;width:0;height:0}
+.tsl{position:absolute;inset:0;background:#2a2b35;border-radius:10px;cursor:pointer;transition:background .2s}
+.tsl::before{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:3px;left:3px;transition:transform .2s}
+.ts input:checked+.tsl{background:#2563eb}
+.ts input:checked+.tsl::before{transform:translateX(18px)}
+.fd{border:none;border-top:1px solid #2a2b35;margin:10px 0}
+#map{width:100%;height:100%}
+.ta{background:#16171e;border-top:1px solid #2a2b35;display:flex;flex-direction:column}
+.th{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:1px solid #2a2b35}
+.th h3{font-size:13px;font-weight:600;color:#8b8c99}
+.ss{background:#1e1f2a;border:1px solid #2a2b35;color:#c4c4cc;padding:4px 8px;border-radius:6px;font-size:12px;font-family:inherit}
+.tsc{overflow-y:auto;flex:1}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{position:sticky;top:0;background:#1a1b24;color:#8b8c99;font-weight:600;text-align:left;padding:7px 12px;border-bottom:1px solid #2a2b35;white-space:nowrap}
+tbody tr{cursor:pointer;transition:background .15s}
+tbody tr:hover{background:#1e1f2a}
+tbody td{padding:7px 12px;border-bottom:1px solid #1e1f2a;white-space:nowrap;color:#c4c4cc}
+.tb{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:500}
+.b1{background:rgba(59,130,246,.15);color:#60a5fa}.b2{background:rgba(245,158,11,.15);color:#fbbf24}
+.b3{background:rgba(34,197,94,.15);color:#4ade80}.b4{background:rgba(239,68,68,.15);color:#f87171}
+.b5{background:rgba(168,85,247,.15);color:#c084fc}.b6{background:rgba(6,182,212,.15);color:#22d3ee}
+.ln{color:#60a5fa;text-decoration:none;font-size:11px}.ln:hover{text-decoration:underline}
+.em{text-align:center;padding:40px;color:#4a4b5a;font-size:13px}
+.mb{display:none;position:fixed;inset:0;background:rgba(15,17,23,.92);z-index:10000;justify-content:center;align-items:center}
+.mb.active{display:flex}
+.md{background:#16171e;border:1px solid #2a2b35;border-radius:12px;padding:24px;width:540px;max-height:80vh}
+.md h3{color:#fff;margin-bottom:6px;font-size:16px}
+.md p{color:#8b8c99;font-size:13px;margin-bottom:12px;line-height:1.5}
+.md textarea{width:100%;height:200px;background:#1e1f2a;border:1px solid #2a2b35;color:#e4e4e7;border-radius:8px;padding:12px;font-size:12px;font-family:monospace;resize:vertical}
+.mbb{display:flex;gap:8px;margin-top:12px}.mbb .btn{flex:1;padding:10px;font-size:14px}
+.leaflet-container{background:#1a1b2e}
+.leaflet-popup-content-wrapper{background:#1e1f2a;color:#e4e4e7;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.5)}
+.leaflet-popup-tip{background:#1e1f2a}
+.leaflet-popup-content{margin:10px 14px;font-family:'Pretendard',sans-serif;font-size:13px}
+.leaflet-popup-close-button{color:#8b8c99!important}
 </style>
 </head>
 <body>
-
 <div class="app">
-  <!-- Header -->
   <div class="header">
     <h1><span>🏠</span> 송파구 월세 매물 브라우저</h1>
     <div class="header-right">
       <span class="badge" id="countBadge">0개 단지</span>
-      <button class="btn-fetch" id="btnFetch" onclick="fetchData()">매물 수집</button>
+      <button class="btn" onclick="fetchData()">매물 수집</button>
+      <button class="btn btn-s" onclick="showModal()">JSON 붙여넣기</button>
     </div>
   </div>
-
-  <!-- Map + Filter -->
   <div class="map-area">
-    <div class="filter-panel">
-      <!-- 매물 유형 -->
-      <div class="filter-section">
-        <div class="filter-label">매물 유형</div>
-        <div class="checkbox-group">
-          <label class="checkbox-item">
-            <input type="checkbox" checked data-type="APT" onchange="applyFilters()">
-            <span class="type-dot dot-apt"></span> 아파트
-          </label>
-          <label class="checkbox-item">
-            <input type="checkbox" checked data-type="OPST" onchange="applyFilters()">
-            <span class="type-dot dot-opst"></span> 오피스텔
-          </label>
-          <label class="checkbox-item">
-            <input type="checkbox" checked data-type="VL" onchange="applyFilters()">
-            <span class="type-dot dot-villa"></span> 빌라
-          </label>
-          <label class="checkbox-item">
-            <input type="checkbox" checked data-type="JGC" onchange="applyFilters()">
-            <span class="type-dot dot-jgc"></span> 재건축
-          </label>
-          <label class="checkbox-item">
-            <input type="checkbox" checked data-type="PRE" onchange="applyFilters()">
-            <span class="type-dot dot-pre"></span> 분양권
-          </label>
-          <label class="checkbox-item">
-            <input type="checkbox" checked data-type="ABYG" onchange="applyFilters()">
-            <span class="type-dot dot-abyg"></span> 주상복합
-          </label>
+    <div class="fp">
+      <div class="fs"><div class="fl">매물 유형</div>
+        <div class="cg">
+          <label class="ci"><input type="checkbox" checked data-type="APT" onchange="af()"><span class="td d1"></span> 아파트</label>
+          <label class="ci"><input type="checkbox" checked data-type="OPST" onchange="af()"><span class="td d2"></span> 오피스텔</label>
+          <label class="ci"><input type="checkbox" checked data-type="VL" onchange="af()"><span class="td d3"></span> 빌라</label>
+          <label class="ci"><input type="checkbox" checked data-type="JGC" onchange="af()"><span class="td d4"></span> 재건축</label>
+          <label class="ci"><input type="checkbox" checked data-type="PRE" onchange="af()"><span class="td d5"></span> 분양권</label>
+          <label class="ci"><input type="checkbox" checked data-type="ABYG" onchange="af()"><span class="td d6"></span> 주상복합</label>
         </div>
       </div>
-
-      <hr class="filter-divider">
-
-      <!-- 면적 -->
-      <div class="filter-section">
-        <div class="filter-label">전용면적 (㎡)</div>
-        <div class="range-row">
-          <input type="number" class="range-input" id="areaMin" placeholder="최소" onchange="applyFilters()">
-          <span style="color:#4a4b5a">~</span>
-          <input type="number" class="range-input" id="areaMax" placeholder="최대" onchange="applyFilters()">
-        </div>
+      <hr class="fd">
+      <div class="fs"><div class="fl">전용면적 (㎡)</div>
+        <div class="rr"><input type="number" class="ri" id="areaMin" placeholder="최소" onchange="af()"><span style="color:#4a4b5a">~</span><input type="number" class="ri" id="areaMax" placeholder="최대" onchange="af()"></div>
       </div>
-
-      <hr class="filter-divider">
-
-      <!-- 세대수 -->
-      <div class="filter-section">
-        <div class="filter-label">총 세대수</div>
-        <div class="range-row">
-          <input type="number" class="range-input" id="hhMin" placeholder="최소" onchange="applyFilters()">
-          <span style="color:#4a4b5a">~</span>
-          <input type="number" class="range-input" id="hhMax" placeholder="최대" onchange="applyFilters()">
-        </div>
+      <hr class="fd">
+      <div class="fs"><div class="fl">세대수</div>
+        <div class="rr"><input type="number" class="ri" id="hhMin" placeholder="최소" onchange="af()"><span style="color:#4a4b5a">~</span><input type="number" class="ri" id="hhMax" placeholder="최대" onchange="af()"></div>
       </div>
-
-      <hr class="filter-divider">
-
-      <!-- 주변시설 -->
-      <div class="filter-section">
-        <div class="filter-label">주변 시설 표시</div>
-        <div class="toggle-row">
-          <label>🚇 지하철역</label>
-          <div class="toggle-switch">
-            <input type="checkbox" id="toggleSubway" checked onchange="toggleLayer('subway')">
-            <span class="toggle-slider"></span>
-          </div>
-        </div>
-        <div class="toggle-row">
-          <label>🌳 공원</label>
-          <div class="toggle-switch">
-            <input type="checkbox" id="togglePark" checked onchange="toggleLayer('park')">
-            <span class="toggle-slider"></span>
-          </div>
-        </div>
+      <hr class="fd">
+      <div class="fs"><div class="fl">주변 시설</div>
+        <div class="tr"><label>🚇 지하철역</label><div class="ts"><input type="checkbox" id="tSub" checked onchange="tl('s')"><span class="tsl"></span></div></div>
+        <div class="tr"><label>🌳 공원</label><div class="ts"><input type="checkbox" id="tPark" checked onchange="tl('p')"><span class="tsl"></span></div></div>
       </div>
     </div>
-
-    <!-- Map -->
     <div id="map"></div>
   </div>
-
-  <!-- Bottom Table -->
-  <div class="table-area">
-    <div class="table-header">
-      <h3 id="tableTitle">매물 수집 버튼을 눌러주세요</h3>
-      <select class="sort-select" id="sortSelect" onchange="applyFilters()">
-        <option value="name">이름순</option>
-        <option value="area">면적순</option>
-        <option value="household">세대수순</option>
-      </select>
+  <div class="ta">
+    <div class="th"><h3 id="tt">매물 수집 버튼을 눌러주세요</h3>
+      <select class="ss" id="sort" onchange="af()"><option value="name">이름순</option><option value="area">면적순</option><option value="hh">세대수순</option><option value="art">매물수순</option></select>
     </div>
-    <div class="table-scroll">
-      <table>
-        <thead>
-          <tr>
-            <th>유형</th>
-            <th>단지명</th>
-            <th>전용면적 (㎡)</th>
-            <th>세대수</th>
-            <th>동수</th>
-            <th>준공</th>
-            <th>매물수</th>
-            <th>링크</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody">
-          <tr><td colspan="8" class="empty-msg">매물 수집 버튼을 눌러 데이터를 불러오세요</td></tr>
-        </tbody>
-      </table>
-    </div>
+    <div class="tsc"><table><thead><tr><th>유형</th><th>단지명</th><th>면적</th><th>세대</th><th>동</th><th>준공</th><th>매물</th><th>링크</th></tr></thead>
+      <tbody id="tb"><tr><td colspan="8" class="em">매물 수집 버튼을 눌러 데이터를 불러오세요</td></tr></tbody></table></div>
   </div>
 </div>
-
-<!-- Loading -->
-<div class="loading-overlay" id="loading">
-  <div class="loading-box">
-    <div class="spinner"></div>
-    <div class="loading-text">송파구 매물 수집 중...</div>
+<div class="mb" id="modal">
+  <div class="md">
+    <h3>JSON 데이터 붙여넣기</h3>
+    <p>네이버 부동산 송파구 → <code>Cmd+Option+I</code> → Network → Fetch/XHR →<br><code>2.0?cortarNo=...</code> → <strong>Response</strong> 탭 전체 복사</p>
+    <textarea id="ji" placeholder="여기에 JSON을 붙여넣으세요..."></textarea>
+    <div class="mbb"><button class="btn" onclick="loadJSON()">불러오기</button><button class="btn btn-s" onclick="hideModal()">닫기</button></div>
   </div>
 </div>
-
-<!-- Kakao Map SDK -->
-<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=13b88cf2a0bd6b7b83495e5a98eb54d7&autoload=false"></script>
-
 <script>
-// ── 데이터 저장 ──
-let allData = [];
-let filteredData = [];
-let map = null;
-let markers = [];
-let subwayMarkers = [];
-let parkMarkers = [];
-let infowindow = null;
+let D=[],F=[];
+const TC={APT:'#3b82f6',OPST:'#f59e0b',VL:'#22c55e',JGC:'#ef4444',PRE:'#a855f7',ABYG:'#06b6d4'};
+const TN={APT:'아파트',OPST:'오피스텔',VL:'빌라',JGC:'재건축',PRE:'분양권',ABYG:'주상복합'};
+const TB={APT:'b1',OPST:'b2',VL:'b3',JGC:'b4',PRE:'b5',ABYG:'b6'};
+const SUB=[{n:'잠실',l:'2/8',a:37.5133,o:127.1001},{n:'잠실새내',l:'2',a:37.5114,o:127.0862},{n:'종합운동장',l:'2/9',a:37.5109,o:127.0736},{n:'삼전',l:'9',a:37.5044,o:127.0855},{n:'석촌고분',l:'9',a:37.5048,o:127.0966},{n:'석촌',l:'8/9',a:37.5057,o:127.1053},{n:'송파',l:'8',a:37.5004,o:127.1093},{n:'가락시장',l:'3/8',a:37.4924,o:127.1184},{n:'문정',l:'8',a:37.4857,o:127.1228},{n:'장지',l:'8',a:37.4783,o:127.1261},{n:'복정',l:'8/수인분당',a:37.4709,o:127.1267},{n:'올림픽공원',l:'5/9',a:37.5163,o:127.1310},{n:'방이',l:'5',a:37.5087,o:127.1268},{n:'오금',l:'3/5',a:37.5032,o:127.1278},{n:'개롱',l:'5',a:37.4935,o:127.1332},{n:'거여',l:'5',a:37.4921,o:127.1431},{n:'마천',l:'5',a:37.4947,o:127.1524},{n:'둔촌동',l:'5',a:37.5201,o:127.1357}];
+const PK=[{n:'올림픽공원',a:37.5204,o:127.1215},{n:'석촌호수공원',a:37.5075,o:127.1018},{n:'송파나루공원',a:37.5174,o:127.1078},{n:'성내천',a:37.5146,o:127.1397},{n:'탄천',a:37.4945,o:127.1089},{n:'오금공원',a:37.5021,o:127.1338}];
 
-// ── 송파구 지하철역 ──
-const SUBWAY_STATIONS = [
-  { name: '잠실역', line: '2/8호선', lat: 37.5133, lng: 127.1001 },
-  { name: '잠실새내역', line: '2호선', lat: 37.5114, lng: 127.0862 },
-  { name: '종합운동장역', line: '2/9호선', lat: 37.5109, lng: 127.0736 },
-  { name: '삼전역', line: '9호선', lat: 37.5044, lng: 127.0855 },
-  { name: '석촌고분역', line: '9호선', lat: 37.5048, lng: 127.0966 },
-  { name: '석촌역', line: '8/9호선', lat: 37.5057, lng: 127.1053 },
-  { name: '송파역', line: '8호선', lat: 37.5004, lng: 127.1093 },
-  { name: '가락시장역', line: '3/8호선', lat: 37.4924, lng: 127.1184 },
-  { name: '문정역', line: '8호선', lat: 37.4857, lng: 127.1228 },
-  { name: '장지역', line: '8호선', lat: 37.4783, lng: 127.1261 },
-  { name: '복정역', line: '8/수인분당', lat: 37.4709, lng: 127.1267 },
-  { name: '올림픽공원역', line: '5/9호선', lat: 37.5163, lng: 127.1310 },
-  { name: '방이역', line: '5호선', lat: 37.5087, lng: 127.1268 },
-  { name: '오금역', line: '3/5호선', lat: 37.5032, lng: 127.1278 },
-  { name: '개롱역', line: '5호선', lat: 37.4935, lng: 127.1332 },
-  { name: '거여역', line: '5호선', lat: 37.4921, lng: 127.1431 },
-  { name: '마천역', line: '5호선', lat: 37.4947, lng: 127.1524 },
-  { name: '둔촌동역', line: '5호선', lat: 37.5201, lng: 127.1357 },
-];
+const map=L.map('map',{center:[37.5048,127.1120],zoom:14,zoomControl:false});
+L.control.zoom({position:'topright'}).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO',maxZoom:19}).addTo(map);
 
-// ── 송파구 공원 ──
-const PARKS = [
-  { name: '올림픽공원', lat: 37.5204, lng: 127.1215 },
-  { name: '석촌호수공원', lat: 37.5075, lng: 127.1018 },
-  { name: '송파나루공원', lat: 37.5174, lng: 127.1078 },
-  { name: '성내천', lat: 37.5146, lng: 127.1397 },
-  { name: '탄천', lat: 37.4945, lng: 127.1089 },
-  { name: '오금공원', lat: 37.5021, lng: 127.1338 },
-  { name: '방이동생태경관보전지역', lat: 37.5128, lng: 127.1235 },
-];
+const mL=L.layerGroup().addTo(map),sL=L.layerGroup().addTo(map),pL=L.layerGroup().addTo(map);
 
-// ── 유형별 색상 ──
-const TYPE_COLORS = {
-  APT: '#3b82f6', OPST: '#f59e0b', VL: '#22c55e',
-  JGC: '#ef4444', PRE: '#a855f7', ABYG: '#06b6d4'
-};
-const TYPE_NAMES = {
-  APT: '아파트', OPST: '오피스텔', VL: '빌라',
-  JGC: '재건축', PRE: '분양권', ABYG: '주상복합'
-};
-const TYPE_BADGE_CLASS = {
-  APT: 'type-badge-apt', OPST: 'type-badge-opst', VL: 'type-badge-villa',
-  JGC: 'type-badge-jgc', PRE: 'type-badge-pre', ABYG: 'type-badge-abyg'
-};
+function ico(t,c){return L.divIcon({className:'',html:`<div style="background:${c};color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap;font-family:Pretendard,sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.4);border:1.5px solid rgba(255,255,255,.3)">${t}</div>`,iconAnchor:[0,0]})}
 
-// ── 카카오맵 초기화 ──
-kakao.maps.load(function() {
-  const container = document.getElementById('map');
-  map = new kakao.maps.Map(container, {
-    center: new kakao.maps.LatLng(37.5048, 127.1120),
-    level: 5
-  });
-  map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
-  infowindow = new kakao.maps.InfoWindow({ zIndex: 1 });
+function fd(y){return y?y.substring(0,4)+'.'+y.substring(4,6):'-'}
 
-  // 초기에 지하철/공원 표시
-  renderSubway();
-  renderParks();
-});
+function rSub(){sL.clearLayers();SUB.forEach(s=>L.marker([s.a,s.o],{icon:ico('🚇 '+s.n+' ('+s.l+')','#7c3aed'),interactive:false}).addTo(sL))}
+function rPark(){pL.clearLayers();PK.forEach(p=>L.marker([p.a,p.o],{icon:ico('🌳 '+p.n,'#15803d'),interactive:false}).addTo(pL))}
+rSub();rPark();
 
-// ── 네이버 부동산 API 호출 ──
-async function fetchData() {
-  const btn = document.getElementById('btnFetch');
-  const loading = document.getElementById('loading');
-  btn.disabled = true;
-  loading.classList.add('active');
-
-  // 송파구 cortarNo = 1171000000 (송파구 전체)
-  // 좌표 범위: 송파구를 넉넉히 커버
-  const url = 'https://new.land.naver.com/api/complexes/single-markers/2.0?' +
-    'cortarNo=1171010400&zoom=15&priceType=RETAIL' +
-    '&markerId&markerType&selectedComplexNo&selectedComplexBuildingNo' +
-    '&fakeComplexMarker' +
-    '&realEstateType=APT%3APRE%3AABYG%3AJGC%3AOPST%3AVL' +
-    '&tradeType=B1' +
-    '&tag=%3A%3A%3A%3A%3A%3A%3A%3A' +
-    '&rentPriceMin=0&rentPriceMax=900000000' +
-    '&priceMin=0&priceMax=900000000' +
-    '&areaMin=0&areaMax=900000000' +
-    '&oldBuildYears&recentlyBuildYears' +
-    '&minHouseHoldCount&maxHouseHoldCount' +
-    '&showArticle=false&sameAddressGroup=false' +
-    '&minMaintenanceCost&maxMaintenanceCost' +
-    '&directions=' +
-    '&leftLon=127.0580&rightLon=127.1520' +
-    '&topLat=37.5270&bottomLat=37.4780' +
-    '&isPresale=true';
-
-  try {
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-        'Accept': 'application/json',
-        'Referer': 'https://new.land.naver.com/'
-      }
-    });
-
-    if (!response.ok) throw new Error('API 응답 실패: ' + response.status);
-
-    const data = await response.json();
-    allData = data || [];
-    applyFilters();
-    document.getElementById('tableTitle').textContent =
-      `총 ${allData.length}개 단지 수집 완료`;
-
-  } catch (err) {
-    // CORS 에러 시 안내
-    alert(
-      '직접 API 호출이 차단되었습니다 (CORS).\n\n' +
-      '아래 방법 중 하나를 사용해주세요:\n' +
-      '1. 크롬에서 CORS 확장 프로그램 설치\n' +
-      '   (예: "Allow CORS" 확장)\n' +
-      '2. 또는 아래 JSON 붙여넣기 기능을 이용하세요.'
-    );
-    showPasteMode();
-  } finally {
-    btn.disabled = false;
-    loading.classList.remove('active');
-  }
+async function fetchData(){
+  try{
+    const r=await fetch('https://new.land.naver.com/api/complexes/single-markers/2.0?cortarNo=1171010400&zoom=15&priceType=RETAIL&markerId&markerType&selectedComplexNo&selectedComplexBuildingNo&fakeComplexMarker&realEstateType=APT%3APRE%3AABYG%3AJGC%3AOPST%3AVL&tradeType=B1&tag=%3A%3A%3A%3A%3A%3A%3A%3A&rentPriceMin=0&rentPriceMax=900000000&priceMin=0&priceMax=900000000&areaMin=0&areaMax=900000000&oldBuildYears&recentlyBuildYears&minHouseHoldCount&maxHouseHoldCount&showArticle=false&sameAddressGroup=false&minMaintenanceCost&maxMaintenanceCost&directions=&leftLon=127.0580&rightLon=127.1520&topLat=37.5270&bottomLat=37.4780&isPresale=true',{headers:{'Accept':'application/json','Referer':'https://new.land.naver.com/'}});
+    if(!r.ok)throw 0;D=await r.json()||[];af();document.getElementById('tt').textContent='총 '+D.length+'개 단지';
+  }catch(e){showModal()}
 }
 
-// ── JSON 붙여넣기 모드 (CORS 우회용) ──
-function showPasteMode() {
-  const existing = document.getElementById('pasteArea');
-  if (existing) return;
+function showModal(){document.getElementById('modal').classList.add('active')}
+function hideModal(){document.getElementById('modal').classList.remove('active')}
+function loadJSON(){try{const d=JSON.parse(document.getElementById('ji').value.trim());D=Array.isArray(d)?d:[d];af();document.getElementById('tt').textContent='총 '+D.length+'개 단지';hideModal()}catch(e){alert('JSON 형식을 확인해주세요.')}}
 
-  const div = document.createElement('div');
-  div.id = 'pasteArea';
-  div.style.cssText = 'position:fixed;inset:0;background:rgba(15,17,23,0.95);z-index:10000;display:flex;justify-content:center;align-items:center;';
-  div.innerHTML = `
-    <div style="background:#16171e;border:1px solid #2a2b35;border-radius:12px;padding:24px;width:560px;max-height:80vh;overflow-y:auto;">
-      <h3 style="color:#fff;margin-bottom:8px;">JSON 데이터 붙여넣기</h3>
-      <p style="color:#8b8c99;font-size:13px;margin-bottom:12px;">
-        크롬 개발자 도구 → Network → <code>2.0?cortarNo=...</code> 요청 →<br>
-        Response 탭에서 전체 내용을 복사해서 아래에 붙여넣으세요.
-      </p>
-      <textarea id="jsonInput" style="width:100%;height:200px;background:#1e1f2a;border:1px solid #2a2b35;color:#e4e4e7;border-radius:8px;padding:12px;font-size:12px;font-family:monospace;resize:vertical;" placeholder="여기에 JSON을 붙여넣으세요..."></textarea>
-      <div style="display:flex;gap:8px;margin-top:12px;">
-        <button onclick="loadPastedJSON()" style="flex:1;background:#2563eb;color:#fff;border:none;padding:10px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">불러오기</button>
-        <button onclick="document.getElementById('pasteArea').remove()" style="flex:1;background:#2a2b35;color:#c4c4cc;border:none;padding:10px;border-radius:8px;font-size:14px;cursor:pointer;">닫기</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(div);
+function af(){
+  const ts=new Set();document.querySelectorAll('[data-type]').forEach(c=>{if(c.checked)ts.add(c.dataset.type)});
+  const a0=parseFloat(document.getElementById('areaMin').value)||0,a1=parseFloat(document.getElementById('areaMax').value)||Infinity;
+  const h0=parseInt(document.getElementById('hhMin').value)||0,h1=parseInt(document.getElementById('hhMax').value)||Infinity;
+  F=D.filter(d=>{if(!ts.has(d.realEstateTypeCode))return false;const a=parseFloat(d.minArea||d.representativeArea||0);if(a<a0||a>a1)return false;const h=d.totalHouseholdCount||0;return h>=h0&&h<=h1});
+  const s=document.getElementById('sort').value;
+  F.sort((a,b)=>s==='name'?(a.complexName||'').localeCompare(b.complexName||''):s==='area'?(parseFloat(b.minArea)||0)-(parseFloat(a.minArea)||0):s==='hh'?(b.totalHouseholdCount||0)-(a.totalHouseholdCount||0):(b.totalArticleCount||0)-(a.totalArticleCount||0));
+  document.getElementById('countBadge').textContent=F.length+'개 단지';
+  rM();rT();
 }
 
-function loadPastedJSON() {
-  try {
-    const raw = document.getElementById('jsonInput').value.trim();
-    const data = JSON.parse(raw);
-    allData = Array.isArray(data) ? data : [data];
-    applyFilters();
-    document.getElementById('tableTitle').textContent =
-      `총 ${allData.length}개 단지 수집 완료`;
-    document.getElementById('pasteArea').remove();
-  } catch (e) {
-    alert('JSON 파싱 실패. 올바른 JSON 형식인지 확인해주세요.');
-  }
-}
-
-// ── 필터 적용 ──
-function applyFilters() {
-  // 체크된 유형
-  const checkedTypes = new Set();
-  document.querySelectorAll('[data-type]').forEach(cb => {
-    if (cb.checked) checkedTypes.add(cb.dataset.type);
-  });
-
-  const areaMin = parseFloat(document.getElementById('areaMin').value) || 0;
-  const areaMax = parseFloat(document.getElementById('areaMax').value) || Infinity;
-  const hhMin = parseInt(document.getElementById('hhMin').value) || 0;
-  const hhMax = parseInt(document.getElementById('hhMax').value) || Infinity;
-
-  filteredData = allData.filter(d => {
-    if (!checkedTypes.has(d.realEstateTypeCode)) return false;
-    const area = parseFloat(d.minArea || d.representativeArea || 0);
-    if (area < areaMin || area > areaMax) return false;
-    const hh = d.totalHouseholdCount || 0;
-    if (hh < hhMin || hh > hhMax) return false;
-    return true;
-  });
-
-  // 정렬
-  const sort = document.getElementById('sortSelect').value;
-  filteredData.sort((a, b) => {
-    if (sort === 'name') return (a.complexName || '').localeCompare(b.complexName || '');
-    if (sort === 'area') return (parseFloat(b.minArea) || 0) - (parseFloat(a.minArea) || 0);
-    if (sort === 'household') return (b.totalHouseholdCount || 0) - (a.totalHouseholdCount || 0);
-    return 0;
-  });
-
-  document.getElementById('countBadge').textContent = filteredData.length + '개 단지';
-  renderMarkers();
-  renderTable();
-}
-
-// ── 마커 렌더링 ──
-function renderMarkers() {
-  // 기존 마커 제거
-  markers.forEach(m => m.setMap(null));
-  markers = [];
-  if (!map) return;
-
-  filteredData.forEach(d => {
-    const color = TYPE_COLORS[d.realEstateTypeCode] || '#888';
-    const typeName = TYPE_NAMES[d.realEstateTypeCode] || d.realEstateTypeName || '';
-    const area = d.minArea && d.maxArea && d.minArea !== d.maxArea
-      ? `${d.minArea}~${d.maxArea}` : (d.minArea || d.representativeArea || '-');
-    const articles = d.totalArticleCount || 0;
-
-    // 커스텀 마커
-    const content = document.createElement('div');
-    content.style.cssText = `
-      background:${color}; color:#fff; padding:3px 8px; border-radius:12px;
-      font-size:11px; font-weight:600; white-space:nowrap; cursor:pointer;
-      box-shadow:0 2px 8px rgba(0,0,0,0.3); border:2px solid rgba(255,255,255,0.3);
-    `;
-    content.textContent = d.complexName || d.markerId;
-
-    const overlay = new kakao.maps.CustomOverlay({
-      position: new kakao.maps.LatLng(d.latitude, d.longitude),
-      content: content,
-      yAnchor: 1.3
-    });
-    overlay.setMap(map);
-    markers.push(overlay);
-
-    // 클릭 시 인포윈도우
-    content.addEventListener('click', () => {
-      const iwContent = `
-        <div style="padding:12px;min-width:200px;font-family:Pretendard,sans-serif;">
-          <strong style="font-size:14px;">${d.complexName || '-'}</strong>
-          <div style="margin-top:6px;font-size:12px;color:#666;">
-            <div>${typeName} · ${d.totalHouseholdCount || '-'}세대 · ${d.totalDongCount || '-'}동</div>
-            <div>전용면적: ${area}㎡</div>
-            <div>준공: ${formatDate(d.completionYearMonth)}</div>
-            <div>매물: ${articles}건</div>
-            <a href="https://new.land.naver.com/complexes/${d.markerId}" target="_blank"
-               style="color:#2563eb;display:inline-block;margin-top:4px;">네이버 부동산에서 보기 →</a>
-          </div>
-        </div>
-      `;
-      infowindow.setContent(iwContent);
-      infowindow.setPosition(new kakao.maps.LatLng(d.latitude, d.longitude));
-      infowindow.open(map);
-    });
+function rM(){
+  mL.clearLayers();
+  F.forEach(d=>{
+    const c=TC[d.realEstateTypeCode]||'#888',tn=TN[d.realEstateTypeCode]||'',ar=d.minArea&&d.maxArea&&d.minArea!==d.maxArea?d.minArea+'~'+d.maxArea:(d.minArea||d.representativeArea||'-');
+    const m=L.marker([d.latitude,d.longitude],{icon:ico(d.complexName||d.markerId,c)}).addTo(mL);
+    m.bindPopup(`<div style="min-width:180px"><strong style="font-size:14px;color:#fff">${d.complexName||'-'}</strong><div style="margin-top:6px;color:#a1a1aa;line-height:1.6">${tn} · ${d.totalHouseholdCount||'-'}세대 · ${d.totalDongCount||'-'}동<br>면적: ${ar}㎡<br>준공: ${fd(d.completionYearMonth)}<br>매물: ${d.totalArticleCount||0}건<br><a href="https://new.land.naver.com/complexes/${d.markerId}" target="_blank" style="color:#60a5fa">네이버 부동산에서 보기 →</a></div></div>`);
   });
 }
 
-// ── 지하철 마커 ──
-function renderSubway() {
-  subwayMarkers.forEach(m => m.setMap(null));
-  subwayMarkers = [];
-  if (!map) return;
-
-  SUBWAY_STATIONS.forEach(s => {
-    const content = document.createElement('div');
-    content.style.cssText = `
-      background:#7c3aed; color:#fff; padding:2px 6px; border-radius:10px;
-      font-size:10px; font-weight:600; white-space:nowrap;
-      box-shadow:0 1px 4px rgba(0,0,0,0.3); border:1.5px solid rgba(255,255,255,0.3);
-      opacity:0.85;
-    `;
-    content.textContent = '🚇 ' + s.name;
-
-    const overlay = new kakao.maps.CustomOverlay({
-      position: new kakao.maps.LatLng(s.lat, s.lng),
-      content: content,
-      yAnchor: 1.3
-    });
-    overlay.setMap(map);
-    subwayMarkers.push(overlay);
-  });
+function rT(){
+  const t=document.getElementById('tb');
+  if(!F.length){t.innerHTML='<tr><td colspan="8" class="em">조건에 맞는 단지가 없습니다</td></tr>';return}
+  t.innerHTML=F.map(d=>{const tc=d.realEstateTypeCode||'',ar=d.minArea&&d.maxArea&&d.minArea!==d.maxArea?d.minArea+'~'+d.maxArea:(d.minArea||d.representativeArea||'-');
+    return `<tr onclick="map.flyTo([${d.latitude},${d.longitude}],16)"><td><span class="tb ${TB[tc]||''}">${TN[tc]||'-'}</span></td><td style="color:#fff;font-weight:500">${d.complexName||'-'}</td><td>${ar}㎡</td><td>${d.totalHouseholdCount||'-'}</td><td>${d.totalDongCount||'-'}</td><td>${fd(d.completionYearMonth)}</td><td>${d.totalArticleCount||0}건</td><td><a class="ln" href="https://new.land.naver.com/complexes/${d.markerId}" target="_blank">상세</a></td></tr>`}).join('');
 }
 
-// ── 공원 마커 ──
-function renderParks() {
-  parkMarkers.forEach(m => m.setMap(null));
-  parkMarkers = [];
-  if (!map) return;
-
-  PARKS.forEach(p => {
-    const content = document.createElement('div');
-    content.style.cssText = `
-      background:#15803d; color:#fff; padding:2px 6px; border-radius:10px;
-      font-size:10px; font-weight:600; white-space:nowrap;
-      box-shadow:0 1px 4px rgba(0,0,0,0.3); border:1.5px solid rgba(255,255,255,0.3);
-      opacity:0.85;
-    `;
-    content.textContent = '🌳 ' + p.name;
-
-    const overlay = new kakao.maps.CustomOverlay({
-      position: new kakao.maps.LatLng(p.lat, p.lng),
-      content: content,
-      yAnchor: 1.3
-    });
-    overlay.setMap(map);
-    parkMarkers.push(overlay);
-  });
-}
-
-// ── 레이어 토글 ──
-function toggleLayer(type) {
-  if (type === 'subway') {
-    const show = document.getElementById('toggleSubway').checked;
-    if (show) renderSubway();
-    else { subwayMarkers.forEach(m => m.setMap(null)); subwayMarkers = []; }
-  } else if (type === 'park') {
-    const show = document.getElementById('togglePark').checked;
-    if (show) renderParks();
-    else { parkMarkers.forEach(m => m.setMap(null)); parkMarkers = []; }
-  }
-}
-
-// ── 테이블 렌더링 ──
-function renderTable() {
-  const tbody = document.getElementById('tableBody');
-
-  if (filteredData.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" class="empty-msg">조건에 맞는 단지가 없습니다</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = filteredData.map(d => {
-    const typeCode = d.realEstateTypeCode || '';
-    const badgeClass = TYPE_BADGE_CLASS[typeCode] || '';
-    const typeName = TYPE_NAMES[typeCode] || d.realEstateTypeName || '-';
-    const area = d.minArea && d.maxArea && d.minArea !== d.maxArea
-      ? `${d.minArea} ~ ${d.maxArea}` : (d.minArea || d.representativeArea || '-');
-
-    return `
-      <tr onclick="panTo(${d.latitude}, ${d.longitude})">
-        <td><span class="type-badge ${badgeClass}">${typeName}</span></td>
-        <td style="color:#fff;font-weight:500;">${d.complexName || '-'}</td>
-        <td>${area}</td>
-        <td>${d.totalHouseholdCount || '-'}</td>
-        <td>${d.totalDongCount || '-'}</td>
-        <td>${formatDate(d.completionYearMonth)}</td>
-        <td>${d.totalArticleCount || 0}건</td>
-        <td><a class="link-naver" href="https://new.land.naver.com/complexes/${d.markerId}" target="_blank">상세보기</a></td>
-      </tr>
-    `;
-  }).join('');
-}
-
-// ── 지도 이동 ──
-function panTo(lat, lng) {
-  if (!map) return;
-  map.panTo(new kakao.maps.LatLng(lat, lng));
-  map.setLevel(3);
-}
-
-// ── 날짜 포맷 ──
-function formatDate(ym) {
-  if (!ym) return '-';
-  return ym.substring(0, 4) + '.' + ym.substring(4, 6);
-}
+function tl(t){t==='s'?(document.getElementById('tSub').checked?sL.addTo(map):map.removeLayer(sL)):(document.getElementById('tPark').checked?pL.addTo(map):map.removeLayer(pL))}
 </script>
-
 </body>
 </html>
